@@ -50,11 +50,7 @@ lazy val sparkMlServing = project.in(file("."))
   .settings(
     name := "spark-ml-serving",
     libraryDependencies ++= sparkDependencies("2.1.0"),
-    libraryDependencies ++= spark2AdditionalDependencies,
-    libraryDependencies ++= Seq(
-      "org.apache.kafka" % "kafka-clients" % "0.8.2.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12"),
-      "org.eclipse.paho" % "org.eclipse.paho.client.mqttv3" % "1.1.0"
-    )
+    libraryDependencies ++= spark2AdditionalDependencies
   )
   .settings(commonAssemblySettings)
 
