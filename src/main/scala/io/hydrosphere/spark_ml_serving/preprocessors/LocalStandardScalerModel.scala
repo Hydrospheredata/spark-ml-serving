@@ -1,15 +1,10 @@
-package io.hydrosphere.mist.api.ml.preprocessors
+package io.hydrosphere.spark_ml_serving.preprocessors
 
-import io.hydrosphere.mist.api.ml._
+import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.feature.StandardScalerModel
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 import org.apache.spark.mllib.feature.{StandardScalerModel => OldStandardScalerModel}
-import org.apache.spark.mllib.linalg.{
-  Vector => OldVector,
-  Vectors => OldVectors,
-  SparseVector => OldSparseVector,
-  DenseVector => OldDenseVector
-}
-import org.apache.spark.ml.linalg.{DenseVector, Vector, SparseVector}
+import org.apache.spark.mllib.linalg.{DenseVector => OldDenseVector, SparseVector => OldSparseVector, Vector => OldVector, Vectors => OldVectors}
 
 class LocalStandardScalerModel(override val sparkTransformer: StandardScalerModel) extends LocalTransformer[StandardScalerModel] {
   override def transform(localData: LocalData): LocalData = {

@@ -1,4 +1,4 @@
-package io.hydrosphere.mist.api.ml
+package io.hydrosphere.spark_ml_serving
 
 object ScalaUtils {
   def companionOf(classz: Class[_]) : Any ={

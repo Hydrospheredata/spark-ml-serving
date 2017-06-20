@@ -1,4 +1,4 @@
-package io.hydrosphere.mist.api.ml.reader
+package io.hydrosphere.spark_ml_serving.reader
 
 import java.util
 

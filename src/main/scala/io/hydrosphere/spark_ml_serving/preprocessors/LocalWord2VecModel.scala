@@ -1,8 +1,8 @@
-package io.hydrosphere.mist.api.ml.preprocessors
+package io.hydrosphere.spark_ml_serving.preprocessors
 
-import io.hydrosphere.mist.api.ml._
+import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.feature.Word2VecModel
-import org.apache.spark.ml.linalg.{DenseVector, Vectors}
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
 
 class LocalWord2VecModel(override val sparkTransformer: Word2VecModel) extends LocalTransformer[Word2VecModel] {

@@ -1,8 +1,8 @@
-package io.hydrosphere.mist.api.ml.preprocessors
+package io.hydrosphere.spark_ml_serving.preprocessors
 
-import io.hydrosphere.mist.api.ml._
+import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.feature.MaxAbsScalerModel
-import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors, SparseVector}
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 class LocalMaxAbsScalerModel(override val sparkTransformer: MaxAbsScalerModel) extends LocalTransformer[MaxAbsScalerModel] {
   override def transform(localData: LocalData): LocalData = {

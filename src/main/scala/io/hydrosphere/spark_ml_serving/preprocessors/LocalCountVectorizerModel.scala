@@ -1,6 +1,6 @@
-package io.hydrosphere.mist.api.ml.preprocessors
+package io.hydrosphere.spark_ml_serving.preprocessors
 
-import io.hydrosphere.mist.api.ml._
+import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.feature.CountVectorizerModel
 import org.apache.spark.ml.linalg.Vectors
 
