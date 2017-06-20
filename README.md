@@ -14,8 +14,9 @@ All `Transformer`s are rewritten to accept `LocalData`.
 1. Import this project as dependency:
 ```scala
 lazy val sparkMlServingDependency = RootProject(uri("git://github.com/Hydrospheredata/spark-ml-serving.git"))
+
 project.in(file("."))
-  // your settings
+  // your project settings
   .dependsOn(sparkMlServingDependency)
 ```
 
@@ -25,7 +26,7 @@ import io.hydrosphere.mist.api.ml.{LocalPipelineModel, PipelineLoader}
 import LocalPipelineModel._
 
 // ....
-val model = PipelineLoader.load("/never/gonna/give/you/up") // Load
+val model = PipelineLoader.load("PATH_TO_MODEL") // Load
 val columns = List(LocalDataColumn("text", Seq("Hello!")))
 val localData = LocalData(columns)
 val result = model.transform(localData) // Transformed result
