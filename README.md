@@ -32,4 +32,4 @@ val localData = LocalData(columns)
 val result = model.transform(localData) // Transformed result
 ```
 
-More examples of different ML models are in [tests](/src/test/scala/io/hydrosphere/mist/api/ml/LocalModelSpec.scala).
+More examples of different ML models are in [tests](/src/test/scala/io/hydrosphere/spark_ml_serving/LocalModelSpec.scala).
