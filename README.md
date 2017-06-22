@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Hydrospheredata/spark-ml-serving.svg?branch=master)](https://travis-ci.org/Hydrospheredata/spark-ml-serving)
+
 # Spark-ml-serving
 
 Contextless ML implementation of Spark ML.
