@@ -15,16 +15,13 @@ All `Transformer`s are rewritten to accept `LocalData`.
 ## How to use
 1. Import this project as dependency:
 ```scala
-lazy val sparkMlServingDependency = RootProject(uri("git://github.com/Hydrospheredata/spark-ml-serving.git"))
-
-project.in(file("."))
-  // your project settings
-  .dependsOn(sparkMlServingDependency)
+scalaVersion := "2.11.8"
+libraryDependencies += "io.hydrosphere" %% "spark-ml-serving" % "0.1.1"
 ```
 
-2. Use it
+2. Use it: [example](/example/src/main/scala/Main.scala)
 ```scala
-import io.hydrosphere.mist.api.ml.{LocalPipelineModel, PipelineLoader}
+import io.hydrosphere.spark_ml_serving._
 import LocalPipelineModel._
 
 // ....
