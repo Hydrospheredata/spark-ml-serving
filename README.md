@@ -24,7 +24,7 @@ project.in(file("."))
 
 2. Use it
 ```scala
-import io.hydrosphere.mist.api.ml.{LocalPipelineModel, PipelineLoader}
+import io.hydrosphere.spark_ml_serving.{LocalPipelineModel, PipelineLoader}
 import LocalPipelineModel._
 
 // ....
