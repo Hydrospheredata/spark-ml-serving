@@ -10,7 +10,8 @@ import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.mllib.linalg.{DenseVector => OldDenseVector}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{Assertion, BeforeAndAfterAll, FunSpec}
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.scalatest.Assertions._
 import LocalPipelineModel._
 
 
@@ -21,7 +22,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
 
   def createInputData[T](name: String, data: List[T]): LocalData = LocalData(LocalDataColumn(name, data))
 
-  def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001): Assertion = {
+  def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001) = {
     assert((a - b).abs < threshold)
   }
 
@@ -571,7 +572,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val validation = Array(-0.0024180402979254723, -0.016408352181315422, 0.017868943512439728)
-      val localData = createInputData("text", "You know the rules and so do I".split(" ").toList)
+      val localData = createInputData("text", List("You know the rules and so do I".split(" ").toArray))
       val result = model.transform(localData)
       val resultList = result.column("result").get.data.map(_.asInstanceOf[Array[Double]])
       compareArrDoubles(validation, resultList.head)

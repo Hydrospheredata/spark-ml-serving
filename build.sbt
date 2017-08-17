@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
   "org.apache.parquet" % "parquet-hadoop" % "1.7.0",
   "org.apache.parquet" % "parquet-avro" % "1.7.0",
 
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  "org.scalactic" %% "scalactic" % "3.0.3" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.3" % "test"
 )
 
 

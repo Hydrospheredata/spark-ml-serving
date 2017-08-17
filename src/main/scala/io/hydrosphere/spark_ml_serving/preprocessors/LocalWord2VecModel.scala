@@ -29,19 +29,25 @@ class LocalWord2VecModel(override val sparkTransformer: Word2VecModel) extends L
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
-        val data = if (column.data.isEmpty) {
-          List(Array.fill(sparkTransformer.getVectorSize){0.0})
-        } else {
-          val vectors = parent.getVectors
-            .mapValues(v => Vectors.dense(v.map(_.toDouble)))
-          val sum = Array.fill(sparkTransformer.getVectorSize){0.0}
-          column.data.map(_.asInstanceOf[String]).foreach { word =>
-            vectors.get(word).foreach { vec =>
-              axpy(1.0, vec.toDense.values, sum)
+        val data = column.data.map(_.asInstanceOf[Array[String]]).map { vec =>
+          if (vec.isEmpty) {
+            Array.fill(sparkTransformer.getVectorSize) {
+              0.0
             }
+          } else {
+            val vectors = parent.getVectors
+              .mapValues(v => Vectors.dense(v.map(_.toDouble)))
+            val sum = Array.fill(sparkTransformer.getVectorSize) {
+              0.0
+            }
+            vec.foreach { word =>
+              vectors.get(word).foreach { vec =>
+                axpy(1.0, vec.toDense.values, sum)
+              }
+            }
+            scal(1.0 / vec.length, sum)
+            sum
           }
-          scal(1.0 / column.data.length, sum)
-          List(sum)
         }
         val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, data)
         localData.withColumn(newColumn)
