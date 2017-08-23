@@ -10,7 +10,7 @@ import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.mllib.linalg.{DenseVector => OldDenseVector}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{Assertion, BeforeAndAfterAll, FunSpec}
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import LocalPipelineModel._
 
 
@@ -21,7 +21,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
 
   def createInputData[T](name: String, data: List[T]): LocalData = LocalData(LocalDataColumn(name, data))
 
-  def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001): Assertion = {
+  def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001): Unit = {
     assert((a - b).abs < threshold)
   }
 

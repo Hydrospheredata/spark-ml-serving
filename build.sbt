@@ -1,7 +1,7 @@
 organization := "io.hydrosphere"
 name := "spark-ml-serving"
 scalaVersion := "2.11.8"
-version := "0.1.1"
+version := "0.1.2"
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % "2.0.0",
