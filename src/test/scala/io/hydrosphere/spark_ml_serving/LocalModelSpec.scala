@@ -571,7 +571,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val validation = Array(-0.0024180402979254723, -0.016408352181315422, 0.017868943512439728)
-      val localData = createInputData("text", "You know the rules and so do I".split(" ").toList)
+      val localData = createInputData("text", List("You know the rules and so do I".split(" ").toArray))
       val result = model.transform(localData)
       val resultList = result.column("result").get.data.map(_.asInstanceOf[Array[Double]])
       compareArrDoubles(validation, resultList.head)
