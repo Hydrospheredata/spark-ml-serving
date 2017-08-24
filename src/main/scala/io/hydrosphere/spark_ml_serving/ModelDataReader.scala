@@ -11,21 +11,22 @@ import parquet.schema.MessageType
 
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
+
 object ModelDataReader {
 
-  def parse(path: String): Map[String, Any] = {
-    findFile(path) match {
-      case Some(f) => readData(f)
+  def parse(source: ModelSource, path: String): Map[String, Any] = {
+    source.findFile(path, true, _.endsWith(".parquet")) match {
+      case Some(p) => readData(p)
       case None => Map.empty
     }
   }
 
-  private def readData(f: File): Map[String, Any] = {
+  private def readData(p: Path): Map[String, Any] = {
     val conf: Configuration = new Configuration()
-    val metaData = ParquetFileReader.readFooter(conf, new Path(f.getAbsolutePath), NO_FILTER)
+    val metaData = ParquetFileReader.readFooter(conf, p, NO_FILTER)
     val schema: MessageType = metaData.getFileMetaData.getSchema
 
-    val reader = ParquetReader.builder[SimpleRecord](new SimpleReadSupport(), new Path(f.getParent)).build()
+    val reader = ParquetReader.builder[SimpleRecord](new SimpleReadSupport(), p.getParent).build()
     val result = mutable.HashMap.empty[String, Any]
 
 
@@ -42,14 +43,6 @@ object ModelDataReader {
         reader.close()
       }
     }
-  }
-
-  private def findFile(dataDir: String): Option[File] = {
-    val dir = new File(dataDir)
-    for {
-      childs <- Option(dir.listFiles)
-      data <- childs.find(f => f.isFile && f.getName.endsWith(".parquet"))
-    } yield data
   }
 
   // TODO ugly
