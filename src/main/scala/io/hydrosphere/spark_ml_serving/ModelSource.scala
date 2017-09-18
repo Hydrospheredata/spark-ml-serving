@@ -38,7 +38,7 @@ case class ModelSource(
 
   def filePath(path: String): Path = {
     val rootPath = fs.getWorkingDirectory
-    new Path(s"$rootPath/$root/$path")
+    new Path(s"$root/$path")
   }
 
 }

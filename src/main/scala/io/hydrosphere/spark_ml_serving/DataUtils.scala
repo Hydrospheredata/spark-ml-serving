@@ -2,12 +2,17 @@ package io.hydrosphere.spark_ml_serving
 
 import breeze.linalg.{DenseVector => BDV, SparseVector => BSV, Vector => BV}
 import org.apache.spark.ml.linalg.{DenseVector, Matrices, Matrix, SparseVector, Vector, Vectors}
-import org.apache.spark.ml.param.{Param, Params}
 import org.apache.spark.ml.tree._
-import org.apache.spark.mllib.linalg.{SparseVector => SVector}
+import org.apache.spark.mllib.linalg.{SparseVector => OldSparceVector, DenseVector => OldDenseVector, Vector => OldVector}
 
 object DataUtils {
-  implicit def mllibVectorToMlVector(v: SVector): SparseVector = new SparseVector(v.size, v.indices, v.values)
+  implicit def mllibVectorToMlVector(v: OldSparceVector): SparseVector = new SparseVector(v.size, v.indices, v.values)
+
+  implicit class PumpedListAny(val list: List[Any]) {
+    def mapToMlVectors: List[DenseVector] = list.map(_.asInstanceOf[List[Double]].toMlVector)
+    def mapToMlLibVectors: List[OldDenseVector] = list.map(_.asInstanceOf[List[Double]].toMlLibVector)
+  }
+
   implicit class KindaListOfDoubles(val list: List[Double]) {
     /**
       * This is workaround for current JSON serialization. It places Int's to List[Double] and that causes exceptions.
@@ -16,6 +21,18 @@ object DataUtils {
       * @return
       */
     def forceDoubles: List[Double] = list.asInstanceOf[List[AnyVal]] map(_.toString.toDouble)
+
+    def toMlVector: DenseVector = new DenseVector(list.toArray)
+
+    def toMlLibVector: OldDenseVector = new OldDenseVector(list.toArray)
+  }
+
+  implicit class PumpedMlVector(val vec: Vector) {
+    def toList: List[Double] = vec.toArray.toList
+  }
+
+  implicit class PumpedMlLibVector(val vec: OldVector) {
+    def toList: List[Double] = vec.toArray.toList
   }
 
   def constructMatrix(params: Map[String, Any]): Matrix = {

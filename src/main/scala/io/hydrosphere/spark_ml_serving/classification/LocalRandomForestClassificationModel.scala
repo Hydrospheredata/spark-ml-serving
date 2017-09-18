@@ -1,28 +1,31 @@
 package io.hydrosphere.spark_ml_serving.classification
 
+import io.hydrosphere.spark_ml_serving.DataUtils._
 import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, RandomForestClassificationModel}
-import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 
 class LocalRandomForestClassificationModel(override val sparkTransformer: RandomForestClassificationModel) extends LocalTransformer[RandomForestClassificationModel] {
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
         val cls = classOf[RandomForestClassificationModel]
-        val rawPredictionCol = LocalDataColumn(sparkTransformer.getRawPredictionCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])).map { vector =>
-          val predictRaw = cls.getDeclaredMethod("predictRaw", classOf[Vector])
-          val res = predictRaw.invoke(sparkTransformer, vector).asInstanceOf[Vector]
-          res.toArray
+
+        val predictRaw = cls.getDeclaredMethod("predictRaw", classOf[Vector])
+        val rawPredictionCol = LocalDataColumn(sparkTransformer.getRawPredictionCol, column.data.mapToMlVectors.map {
+          predictRaw.invoke(sparkTransformer, _).asInstanceOf[Vector].toList
         })
-        val probabilityCol = LocalDataColumn(sparkTransformer.getProbabilityCol, rawPredictionCol.data.map(Vectors.dense).map { vector =>
-          val raw2probabilityInPlace = cls.getDeclaredMethod("raw2probabilityInPlace", classOf[Vector])
-          val res = raw2probabilityInPlace.invoke(sparkTransformer, vector.copy).asInstanceOf[Vector]
-          res.toArray
+
+        val raw2probabilityInPlace = cls.getDeclaredMethod("raw2probabilityInPlace", classOf[Vector])
+        val probabilityCol = LocalDataColumn(sparkTransformer.getProbabilityCol, rawPredictionCol.data.map(_.toMlVector).map { vector =>
+          raw2probabilityInPlace.invoke(sparkTransformer, vector.copy).asInstanceOf[Vector].toList
         })
-        val predictionCol = LocalDataColumn(sparkTransformer.getPredictionCol, rawPredictionCol.data.map(Vectors.dense).map { vector =>
-          val raw2prediction = cls.getMethod("raw2prediction", classOf[Vector])
+
+        val raw2prediction = cls.getMethod("raw2prediction", classOf[Vector]) // -> Double
+        val predictionCol = LocalDataColumn(sparkTransformer.getPredictionCol, rawPredictionCol.data.map(_.toMlVector).map { vector =>
           raw2prediction.invoke(sparkTransformer, vector.copy)
         })
+
         localData.withColumn(rawPredictionCol)
           .withColumn(probabilityCol)
           .withColumn(predictionCol)

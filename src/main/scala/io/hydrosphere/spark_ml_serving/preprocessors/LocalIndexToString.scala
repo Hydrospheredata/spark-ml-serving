@@ -18,6 +18,7 @@ class LocalIndexToString(override val sparkTransformer: IndexToString) extends L
           }
         }
         val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, column.data map {
+          case i: Int => indexer(i.toDouble)
           case d: Double => indexer(d)
           case d => throw new IllegalArgumentException(s"Unknown data to index: $d")
         })

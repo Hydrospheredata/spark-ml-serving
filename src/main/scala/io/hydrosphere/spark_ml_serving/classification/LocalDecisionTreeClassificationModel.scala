@@ -1,8 +1,9 @@
 package io.hydrosphere.spark_ml_serving.classification
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.tree.Node
 
 class LocalDecisionTreeClassificationModel(override val sparkTransformer: DecisionTreeClassificationModel) extends LocalTransformer[DecisionTreeClassificationModel] {
@@ -11,9 +12,12 @@ class LocalDecisionTreeClassificationModel(override val sparkTransformer: Decisi
       case Some(column) =>
         val method = classOf[DecisionTreeClassificationModel].getMethod("predict", classOf[Vector])
         method.setAccessible(true)
-        val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])).map { vector =>
-          method.invoke(sparkTransformer, vector).asInstanceOf[Double]
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors.map(
+            method.invoke(sparkTransformer, _).asInstanceOf[Double]
+          )
+        )
         localData.withColumn(newColumn)
       case None => localData
     }

@@ -1,9 +1,10 @@
 package io.hydrosphere.spark_ml_serving.preprocessors
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.feature.IDFModel
 import org.apache.spark.mllib.feature.{IDFModel => OldIDFModel}
-import org.apache.spark.mllib.linalg.{DenseVector => OldDenseVector, SparseVector => OldSparseVector, Vector => OldVector, Vectors => OldVectors}
+import org.apache.spark.mllib.linalg.{Vector => OldVector, Vectors => OldVectors}
 
 class LocalIDF(override val sparkTransformer: IDFModel) extends LocalTransformer[IDFModel] {
   override def transform(localData: LocalData): LocalData = {
@@ -11,32 +12,19 @@ class LocalIDF(override val sparkTransformer: IDFModel) extends LocalTransformer
 
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
-        val newData = column.data.map(r => {
-          val n = r.asInstanceOf[OldVector].size
-          r match {
-            case OldSparseVector(_, indices, values) =>
-              val nnz = indices.length
-              val newValues = new Array[Double](nnz)
-              var k = 0
-              while (k < nnz) {
-                newValues(k) = values(k) * idf(indices(k))
-                k += 1
-              }
-              OldVectors.sparse(n, indices, newValues)
-            case OldDenseVector(values) =>
-              val newValues = new Array[Double](n)
-              var j = 0
-              while (j < n) {
-                newValues(j) = values(j) * idf(j)
-                j += 1
-              }
-              OldVectors.dense(newValues)
-            case other =>
-              throw new UnsupportedOperationException(
-                s"Only sparse and dense vectors are supported but got ${other.getClass}.")
+        val newData = column.data.mapToMlLibVectors.map { vector =>
+          val n = vector.size
+          val values = vector.values
+          val newValues = new Array[Double](n)
+          var j = 0
+          while (j < n) {
+            newValues(j) = values(j) * idf(j)
+            j += 1
           }
-        })
+          newValues.toList
+        }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
+
       case None => localData
     }
   }

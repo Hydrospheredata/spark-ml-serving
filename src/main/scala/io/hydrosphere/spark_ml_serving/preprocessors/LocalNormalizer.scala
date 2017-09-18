@@ -1,24 +1,18 @@
 package io.hydrosphere.spark_ml_serving.preprocessors
 
+import io.hydrosphere.spark_ml_serving.DataUtils._
 import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.feature.Normalizer
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 
 class LocalNormalizer(override val sparkTransformer: Normalizer) extends LocalTransformer[Normalizer] {
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
         val method = classOf[Normalizer].getMethod("createTransformFunc")
-        val newData = column.data.map(r => {
-          val vector = r match {
-            case x: List[Any] => Vectors.dense(x.map(_.toString.toDouble).toArray)
-            case x: SparseVector => x
-            case x: DenseVector => x
-            case unknown =>
-              throw new IllegalArgumentException(s"Unknown data type for LocalMaxAbsScaler: ${unknown.getClass}")
-          }
+        val newData = column.data.mapToMlVectors.map { vector =>
           method.invoke(sparkTransformer).asInstanceOf[Vector => Vector](vector)
-        })
+        }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData
     }

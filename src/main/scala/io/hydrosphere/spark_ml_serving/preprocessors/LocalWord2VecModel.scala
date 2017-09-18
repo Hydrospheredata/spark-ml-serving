@@ -33,7 +33,7 @@ class LocalWord2VecModel(override val sparkTransformer: Word2VecModel) extends L
           if (vec.isEmpty) {
             Array.fill(sparkTransformer.getVectorSize) {
               0.0
-            }
+            }.toList
           } else {
             val vectors = parent.getVectors
               .mapValues(v => Vectors.dense(v.map(_.toDouble)))
@@ -46,7 +46,7 @@ class LocalWord2VecModel(override val sparkTransformer: Word2VecModel) extends L
               }
             }
             scal(1.0 / vec.length, sum)
-            sum
+            sum.toList
           }
         }
         val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, data)

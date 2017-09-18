@@ -13,10 +13,9 @@ class LocalCountVectorizerModel(override val sparkTransformer: CountVectorizerMo
 
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
-        val newCol = column.data.map { data =>
+        val newCol = column.data.map(_.asInstanceOf[List[String]]).map { arr =>
           val termCounts = mutable.HashMap.empty[Int, Double]
           var tokenCount = 0L
-          val arr = data.asInstanceOf[List[String]]
           arr.foreach { token =>
             dict.get(token) foreach  { index =>
               val storedValue = termCounts.getOrElseUpdate(index, 0.0)

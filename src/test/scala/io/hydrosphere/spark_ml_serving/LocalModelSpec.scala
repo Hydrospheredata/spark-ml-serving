@@ -25,7 +25,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     assert((a - b).abs < threshold)
   }
 
-  def compareArrDoubles(a: Array[Double], b: Array[Double], threshold: Double = 0.0001): Unit = {
+  def compareArrDoubles(a: Seq[Double], b: Seq[Double], threshold: Double = 0.0001): Unit = {
     a.zip(b).foreach{
       case (aa, bb) => compareDoubles(aa, bb, threshold)
     }
@@ -138,9 +138,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
         List(2.0, 0.0, 3.0, 4.0, 5.0),
         List(4.0, 0.0, 0.0, 6.0, 7.0)
       )))
-      val result = trainedModel.transform(data).column("scaledFeatures").get.data.map { f =>
-        f.asInstanceOf[Array[Double]]
-      }
+      val result = trainedModel.transform(data).column("scaledFeatures").get.data
       val validation = List(
         List(0.5, 0.0, 0.6546536707079772, 1.7320508075688774, 0.0),
         List(1.0, 0.0, 1.9639610121239315, 3.464101615137755, 4.330127018922194),
@@ -148,7 +146,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
       )
 
       result zip validation foreach {
-        case (arr: Array[Double], validRow: List[Double]) => assert(arr === validRow)
+        case (arr: List[Double], validRow: List[Double]) => assert(arr === validRow)
       }
     }
   }
@@ -224,9 +222,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
         List(2.0, 4.0, 5.0),
         List(0.0, 6.0, 7.0)
       )))
-      val result = trainedModel.transform(data).column("scaledFeatures").get.data.map { f =>
-        f.asInstanceOf[DenseVector].toArray
-      }
+      val result = trainedModel.transform(data).column("scaledFeatures").get.data
       val validation = Array(
         List(0.25, 0.0, 0.125),
         List(0.5, 0.4, 0.625),
@@ -234,7 +230,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
       )
 
       result zip validation foreach {
-        case (arr: Array[Double], validRow: List[Double]) => assert(arr === validRow)
+        case (arr: List[Double], validRow: List[Double]) => assert(arr === validRow)
       }
     }
   }
@@ -279,7 +275,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
       )
 
       result zip validation foreach {
-        case (arr: Array[Double], validRow: List[Double]) => assert(arr === validRow)
+        case (arr: List[Double], validRow: List[Double]) => assert(arr === validRow)
       }
     }
   }
@@ -358,16 +354,14 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
         List(2.0, 0.0, 3.0, 4.0, 5.0),
         List(4.0, 0.0, 0.0, 6.0, 7.0)
       )))
-      val result = trainedModel.transform(data).column("pcaFeatures").get.data map { f =>
-        f.asInstanceOf[OldDenseVector].toArray
-      }
+      val result = trainedModel.transform(data).column("pcaFeatures").get.data
       val validation = Array(
         List(-4.645104331781534, -1.1167972663619026, -5.524543751369387),
         List(-6.428880535676489, -5.337951427775355, -5.524543751369389)
       )
 
       result zip validation foreach {
-        case (arr: Array[Double], validRow: List[Double]) => assert(arr === validRow)
+        case (arr: List[Double], validRow: List[Double]) => assert(arr === validRow)
       }
     }
   }
@@ -571,9 +565,9 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val validation = Array(-0.0024180402979254723, -0.016408352181315422, 0.017868943512439728)
-      val localData = createInputData("text", List("You know the rules and so do I".split(" ").toArray))
+      val localData = createInputData("text", List("You know the rules and so do I".split(" ")))
       val result = model.transform(localData)
-      val resultList = result.column("result").get.data.map(_.asInstanceOf[Array[Double]])
+      val resultList = result.column("result").get.data.map(_.asInstanceOf[List[Double]])
       compareArrDoubles(validation, resultList.head)
     }
   }
@@ -619,8 +613,8 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val localData = createInputData("features", List(
-        Array(1.0, 2.0, 3.0, 4.0, 5.0),
-        Array(8.0, 0.0, 5.0, 1.0, 7.0)
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
       ))
       val result = model.transform(localData)
       val resLabels = result.column("predictedLabel").get.data.map(_.asInstanceOf[String])
@@ -657,11 +651,11 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val localData = createInputData("features", List(
-        Array(1.0, 2.0, 3.0, 4.0, 5.0),
-        Array(8.0, 0.0, 5.0, 1.0, 7.0)
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
       ))
       val result = model.transform(localData)
-      val resLabels = result.column("prediction").get.data.map(_.asInstanceOf[Double])
+      val resLabels = result.column("prediction").get.data
       assert(resLabels === List(1.0, 0.0))
     }
   }
@@ -695,8 +689,8 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val localData = createInputData("features", List(
-        Array(1.0, 2.0, 3.0, 4.0, 5.0),
-        Array(8.0, 0.0, 5.0, 1.0, 7.0)
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
       ))
       val result = model.transform(localData)
       val resLabels = result.column("predictedLabel").get.data.map(_.asInstanceOf[String])
@@ -731,12 +725,12 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val localData = createInputData("features", List(
-        Array(4.0, 0.2, 3.0, 4.0, 5.0),
-        Array(3.0, 0.3, 1.0, 4.1, 5.0),
-        Array(2.0, 0.5, 3.2, 4.0, 5.0),
-        Array(5.0, 0.7, 1.5, 4.0, 5.0),
-        Array(1.0, 0.1, 7.0, 4.0, 5.0),
-        Array(8.0, 0.3, 5.0, 1.0, 7.0)
+        List(4.0, 0.2, 3.0, 4.0, 5.0),
+        List(3.0, 0.3, 1.0, 4.1, 5.0),
+        List(2.0, 0.5, 3.2, 4.0, 5.0),
+        List(5.0, 0.7, 1.5, 4.0, 5.0),
+        List(1.0, 0.1, 7.0, 4.0, 5.0),
+        List(8.0, 0.3, 5.0, 1.0, 7.0)
       ))
       val result = model.transform(localData)
       val resLabels = result.column("prediction").get.data.map(_.asInstanceOf[Double]).map(_ > 0.5)
@@ -803,12 +797,12 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
     it("should transform") {
       val model = PipelineLoader.load(path)
       val localData = createInputData("features", List(
-        Array(4.0, 0.2, 3.0, 4.0, 5.0),
-        Array(3.0, 0.3, 1.0, 4.1, 5.0),
-        Array(2.0, 0.5, 3.2, 4.0, 5.0),
-        Array(5.0, 0.7, 1.5, 4.0, 5.0),
-        Array(1.0, 0.1, 7.0, 4.0, 5.0),
-        Array(8.0, 0.3, 5.0, 1.0, 7.0)
+        List(4.0, 0.2, 3.0, 4.0, 5.0),
+        List(3.0, 0.3, 1.0, 4.1, 5.0),
+        List(2.0, 0.5, 3.2, 4.0, 5.0),
+        List(5.0, 0.7, 1.5, 4.0, 5.0),
+        List(1.0, 0.1, 7.0, 4.0, 5.0),
+        List(8.0, 0.3, 5.0, 1.0, 7.0)
       ))
       val result = model.transform(localData)
       val res = result.column("prediction").get.data.map(_.asInstanceOf[Int])
