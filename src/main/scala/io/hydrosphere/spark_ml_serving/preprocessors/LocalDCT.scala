@@ -11,7 +11,7 @@ class LocalDCT(override val sparkTransformer: DCT) extends LocalTransformer[DCT]
       case Some(column) =>
         val method = classOf[DCT].getMethod("createTransformFunc")
         val newData = column.data.mapToMlVectors.map { r =>
-          method.invoke(sparkTransformer).asInstanceOf[Vector => Vector](r)
+          method.invoke(sparkTransformer).asInstanceOf[Vector => Vector](r).toList
         }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData

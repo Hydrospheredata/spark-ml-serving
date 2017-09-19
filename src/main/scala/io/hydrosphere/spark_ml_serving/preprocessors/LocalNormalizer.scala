@@ -11,7 +11,7 @@ class LocalNormalizer(override val sparkTransformer: Normalizer) extends LocalTr
       case Some(column) =>
         val method = classOf[Normalizer].getMethod("createTransformFunc")
         val newData = column.data.mapToMlVectors.map { vector =>
-          method.invoke(sparkTransformer).asInstanceOf[Vector => Vector](vector)
+          method.invoke(sparkTransformer).asInstanceOf[Vector => Vector](vector).toList
         }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData

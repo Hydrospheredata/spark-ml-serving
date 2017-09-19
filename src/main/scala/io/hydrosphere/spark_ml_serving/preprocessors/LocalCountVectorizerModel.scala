@@ -1,6 +1,7 @@
 package io.hydrosphere.spark_ml_serving.preprocessors
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.feature.CountVectorizerModel
 import org.apache.spark.ml.linalg.Vectors
 
@@ -30,7 +31,7 @@ class LocalCountVectorizerModel(override val sparkTransformer: CountVectorizerMo
             termCounts filter(_._2 >= eTF) toSeq
           }
 
-          Vectors.sparse(dict.size, eCounts.toList)
+          Vectors.sparse(dict.size, eCounts.toList).toList
         }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newCol))
       case None => localData

@@ -24,7 +24,7 @@ class LocalOneHotEncoder(override val sparkTransformer: OneHotEncoder) extends L
           if (r < size) {
             res.update(r.toInt, 1.0)
           }
-          res
+          res.toList
         })
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData

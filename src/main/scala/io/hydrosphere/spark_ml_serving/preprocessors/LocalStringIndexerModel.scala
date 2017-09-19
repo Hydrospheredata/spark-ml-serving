@@ -27,9 +27,8 @@ class LocalStringIndexerModel(override val sparkTransformer: StringIndexerModel)
             throw new SparkException(s"Unseen label: $label.")
           }
         }
-        val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, column.data map { feature =>
-          val str = feature.asInstanceOf[String]
-          indexer(str)
+        val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, column.data.map(_.asInstanceOf[String])map { feature =>
+          indexer(feature)
         })
         localData.withColumn(newColumn)
       case None => localData
