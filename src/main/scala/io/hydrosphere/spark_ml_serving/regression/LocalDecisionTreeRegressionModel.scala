@@ -1,7 +1,8 @@
 package io.hydrosphere.spark_ml_serving.regression
 
 import io.hydrosphere.spark_ml_serving._
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import DataUtils._
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 import org.apache.spark.ml.tree.Node
 
@@ -11,9 +12,12 @@ class LocalDecisionTreeRegressionModel(override val sparkTransformer: DecisionTr
       case Some(column) =>
         val method = classOf[DecisionTreeRegressionModel].getMethod("predict", classOf[Vector])
         method.setAccessible(true)
-        val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])).map { vector =>
-          method.invoke(sparkTransformer, vector).asInstanceOf[Double]
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors.map { vector =>
+            method.invoke(sparkTransformer, vector).asInstanceOf[Double]
+          }
+        )
         localData.withColumn(newColumn)
       case None => localData
     }

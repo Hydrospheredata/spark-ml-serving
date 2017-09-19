@@ -4,8 +4,7 @@ import java.lang.Boolean
 
 import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.classification.LogisticRegressionModel
-import org.apache.spark.ml.linalg.{Matrix, SparseMatrix, SparseVector, Vector, Vectors}
-import org.apache.spark.mllib.linalg.{SparseVector => SVector}
+import org.apache.spark.ml.linalg.{Matrix, SparseMatrix, Vector, Vectors}
 
 class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegressionModel) extends LocalTransformer[LogisticRegressionModel] {
   override def transform(localData: LocalData): LocalData = {
@@ -14,28 +13,31 @@ class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegres
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
         var newData = localData
-        val predict = classOf[LogisticRegressionModel].getMethod("predict", classOf[Vector])
+        val mappedData = column.data.mapToMlVectors
         if (sparkTransformer.getPredictionCol.nonEmpty) {
-          val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map(m => {
-            val vector: SparseVector = m.asInstanceOf[SVector]
-            predict.invoke(sparkTransformer, vector)
-          }))
+          val predict = classOf[LogisticRegressionModel].getMethod("predict", classOf[Vector]) // -> Double
+          val newColumn = LocalDataColumn(
+            sparkTransformer.getPredictionCol,
+            mappedData.map(predict.invoke(sparkTransformer, _))
+          )
           newData = newData.withColumn(newColumn)
         }
-        val predictRaw = classOf[LogisticRegressionModel].getMethod("predictRaw", classOf[Vector])
+
         if (sparkTransformer.getRawPredictionCol.nonEmpty) {
-          val newColumn = LocalDataColumn(sparkTransformer.getRawPredictionCol, column.data.map(m => {
-            val vector: SparseVector = m.asInstanceOf[SVector]
-            predictRaw.invoke(sparkTransformer, vector)
-          }))
+          val predictRaw = classOf[LogisticRegressionModel].getMethod("predictRaw", classOf[Vector])
+          val newColumn = LocalDataColumn(
+            sparkTransformer.getRawPredictionCol,
+            mappedData.map(predictRaw.invoke(sparkTransformer, _).asInstanceOf[Vector].toList)
+          )
           newData = newData.withColumn(newColumn)
         }
-        val predictProbability = classOf[LogisticRegressionModel].getMethod("predictProbability", classOf[AnyRef])
+
         if (sparkTransformer.getProbabilityCol.nonEmpty) {
-          val newColumn = LocalDataColumn(sparkTransformer.getProbabilityCol, column.data.map(m => {
-            val vector: SparseVector = m.asInstanceOf[SVector]
-            predictProbability.invoke(sparkTransformer, vector)
-          }))
+          val predictProbability = classOf[LogisticRegressionModel].getMethod("predictProbability", classOf[AnyRef])
+          val newColumn = LocalDataColumn(
+            sparkTransformer.getProbabilityCol,
+            mappedData.map(predictProbability.invoke(sparkTransformer, _).asInstanceOf[Vector].toList)
+          )
           newData = newData.withColumn(newColumn)
         }
         newData

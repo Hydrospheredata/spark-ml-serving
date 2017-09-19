@@ -1,6 +1,7 @@
 package io.hydrosphere.spark_ml_serving.clustering
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.clustering.KMeansModel
 import org.apache.spark.mllib.clustering.{KMeansModel => OldKMeansModel}
 import org.apache.spark.mllib.clustering.{KMeansModel => MLlibKMeans}
@@ -19,9 +20,10 @@ class LocalKMeansModel(override val sparkTransformer: KMeansModel) extends Local
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
-        val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])).map { vector =>
-          parent.predict(vector)
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlLibVectors.map(parent.predict)
+        )
         localData.withColumn(newColumn)
       case None => localData
     }

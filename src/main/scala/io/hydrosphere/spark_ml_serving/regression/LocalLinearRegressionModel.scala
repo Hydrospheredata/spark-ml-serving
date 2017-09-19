@@ -1,6 +1,7 @@
 package io.hydrosphere.spark_ml_serving.regression
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.LinearRegressionModel
 
@@ -10,10 +11,11 @@ class LocalLinearRegressionModel(override val sparkTransformer: LinearRegression
       case Some(column) =>
         val predict = classOf[LinearRegressionModel].getMethod("predict", classOf[Vector])
         predict.setAccessible(true)
-        val newCol = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map { data =>
-          val vector = data.asInstanceOf[Vector]
-          predict.invoke(sparkTransformer,vector).asInstanceOf[Double]
-        })
+        val newCol = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors .map { vector =>
+            predict.invoke(sparkTransformer, vector).asInstanceOf[Double]
+          })
         localData.withColumn(newCol)
       case None =>
         localData

@@ -8,7 +8,11 @@ class LocalOneHotEncoder(override val sparkTransformer: OneHotEncoder) extends L
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
-        val col = column.data.asInstanceOf[List[Double]]
+        val col = column.data match {
+          case d: List[Double] => d
+          case d: List[Int] => d.map(_.toDouble)
+          case x => throw new IllegalArgumentException(s"Incorrect index value: $x")
+        }
         col.foreach(x =>
           assert(x >= 0.0 && x == x.toInt,
             s"Values from column ${sparkTransformer.getInputCol} must be indices, but got $x.")
@@ -20,7 +24,7 @@ class LocalOneHotEncoder(override val sparkTransformer: OneHotEncoder) extends L
           if (r < size) {
             res.update(r.toInt, 1.0)
           }
-          res
+          res.toList
         })
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData

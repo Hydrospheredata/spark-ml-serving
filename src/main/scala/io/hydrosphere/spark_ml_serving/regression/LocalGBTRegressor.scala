@@ -1,7 +1,8 @@
 package io.hydrosphere.spark_ml_serving.regression
 
+import io.hydrosphere.spark_ml_serving.DataUtils._
 import io.hydrosphere.spark_ml_serving._
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressionModel, GBTRegressor}
 import org.apache.spark.ml.tree.Node
 
@@ -11,24 +12,11 @@ class LocalGBTRegressor(override val sparkTransformer: GBTRegressionModel)  exte
       case Some(column) =>
         val method = classOf[GBTRegressionModel].getMethod("predict", classOf[Vector])
         method.setAccessible(true)
-        val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data map { feature =>
-          val vector: Vector = feature match {
-            case x: Map[String, Any] =>
-              x("type") match {
-                case 0 =>
-                  val indices = x.getOrElse("indices", List()).asInstanceOf[List[Int]].toArray
-                  val values = x.getOrElse("values", List()).asInstanceOf[List[Any]].map(_.toString.toDouble).toArray
-                  Vectors.sparse(
-                    x.getOrElse("size", 0).asInstanceOf[Int],
-                    indices,
-                    values
-                  )
-                case _ => Vectors.dense(x.getOrElse("values", List()).asInstanceOf[List[Any]].map(_.toString.toDouble).toArray)
-              }
-            case x: Vector => x
-          }
-          method.invoke(sparkTransformer, vector).asInstanceOf[Double]
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors.map { vector =>
+            method.invoke(sparkTransformer, vector).asInstanceOf[Double]
+          })
         localData.withColumn(newColumn)
       case None =>
         localData

@@ -8,8 +8,8 @@ class LocalTokenizer(override val sparkTransformer: Tokenizer) extends LocalTran
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
         val method = classOf[Tokenizer].getMethod("createTransformFunc")
-        val newData = column.data.map(s => {
-          method.invoke(sparkTransformer).asInstanceOf[String => Seq[String]](s.asInstanceOf[String])
+        val newData = column.data.map(_.asInstanceOf[String]).map(s => {
+          method.invoke(sparkTransformer).asInstanceOf[String => Seq[String]](s)
         })
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData

@@ -3,6 +3,7 @@ package io.hydrosphere.spark_ml_serving.preprocessors
 import java.lang.reflect.InvocationTargetException
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.feature.VectorIndexerModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
@@ -47,10 +48,12 @@ class LocalVectorIndexerModel(override val sparkTransformer: VectorIndexerModel)
     }
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
-        val newColumn = LocalDataColumn(sparkTransformer.getOutputCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])) map { data =>
-          transformFunc(data).toDense.values
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getOutputCol,
+          column.data.mapToMlVectors.map(transformFunc(_).toList)
+        )
         localData.withColumn(newColumn)
+
       case None => localData
     }
   }

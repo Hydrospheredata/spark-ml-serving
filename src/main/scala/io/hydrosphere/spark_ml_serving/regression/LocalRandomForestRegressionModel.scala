@@ -1,7 +1,8 @@
 package io.hydrosphere.spark_ml_serving.regression
 
+import io.hydrosphere.spark_ml_serving.DataUtils._
 import io.hydrosphere.spark_ml_serving._
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
 
 /**
@@ -13,9 +14,12 @@ class LocalRandomForestRegressionModel(override val sparkTransformer: RandomFore
     val predict = cls.getMethod("predict", classOf[Vector])
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
-        val predictionCol = LocalDataColumn(sparkTransformer.getPredictionCol, column.data.map(f => Vectors.dense(f.asInstanceOf[Array[Double]])).map{ vector =>
-          predict.invoke(sparkTransformer, vector).asInstanceOf[Double]
-        })
+        val predictionCol = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors.map { vector =>
+            predict.invoke(sparkTransformer, vector).asInstanceOf[Double]
+          }
+        )
         localData.withColumn(predictionCol)
       case None => localData
     }

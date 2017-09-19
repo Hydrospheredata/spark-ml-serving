@@ -1,6 +1,7 @@
 package io.hydrosphere.spark_ml_serving.clustering
 
 import io.hydrosphere.spark_ml_serving._
+import DataUtils._
 import org.apache.spark.ml.clustering.GaussianMixtureModel
 import org.apache.spark.ml.linalg.{Matrix, Vector}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
@@ -11,9 +12,11 @@ class LocalGaussianMixtureModel(override val sparkTransformer: GaussianMixtureMo
       case Some(column) =>
         val predictMethod = classOf[GaussianMixtureModel].getMethod("predict", classOf[Vector])
         predictMethod.setAccessible(true)
-        val newColumn = LocalDataColumn(sparkTransformer.getPredictionCol, column.data map { feature =>
-          predictMethod.invoke(sparkTransformer, feature.asInstanceOf[Vector]).asInstanceOf[Int]
-        })
+        val newColumn = LocalDataColumn(
+          sparkTransformer.getPredictionCol,
+          column.data.mapToMlVectors map {
+            predictMethod.invoke(sparkTransformer, _).asInstanceOf[Int]
+          })
         localData.withColumn(newColumn)
       case None => localData
     }
