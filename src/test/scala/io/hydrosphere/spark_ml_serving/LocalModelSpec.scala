@@ -485,10 +485,10 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
         List(1.0, 0.1, 7.0, 4.0, 5.0),
         List(8.0, 0.3, 5.0, 1.0, 7.0)
       )))
-      val result = trainedModel.transform(data).column("prediction").get.data
+      val result = trainedModel.transform(data).column("prediction")
       val validation = Array(1.0, 1.0, 0.0, 0.0)
 
-      result zip validation foreach {
+      result.get.data zip validation foreach {
         case (arr: Double, valid: Double) => assert(arr === valid)
       }
     }

@@ -5,22 +5,9 @@ import DataUtils._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.LinearRegressionModel
 
-class LocalLinearRegressionModel(override val sparkTransformer: LinearRegressionModel) extends LocalTransformer[LinearRegressionModel] {
-  override def transform(localData: LocalData): LocalData = {
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        val predict = classOf[LinearRegressionModel].getMethod("predict", classOf[Vector])
-        predict.setAccessible(true)
-        val newCol = LocalDataColumn(
-          sparkTransformer.getPredictionCol,
-          column.data.mapToMlVectors .map { vector =>
-            predict.invoke(sparkTransformer, vector).asInstanceOf[Double]
-          })
-        localData.withColumn(newCol)
-      case None =>
-        localData
-    }
-  }
+class LocalLinearRegressionModel(override val sparkTransformer: LinearRegressionModel)
+  extends LocalPredictionModel[LinearRegressionModel] {
+
 }
 
 object LocalLinearRegressionModel extends LocalModel[LinearRegressionModel] {

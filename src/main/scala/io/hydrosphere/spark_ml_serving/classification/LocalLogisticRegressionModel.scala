@@ -6,44 +6,9 @@ import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.{Matrix, SparseMatrix, Vector, Vectors}
 
-class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegressionModel) extends LocalTransformer[LogisticRegressionModel] {
-  override def transform(localData: LocalData): LocalData = {
-    import DataUtils._
+class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegressionModel)
+  extends LocalProbabilisticClassificationModel[LogisticRegressionModel] {
 
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        var newData = localData
-        val mappedData = column.data.mapToMlVectors
-        if (sparkTransformer.getPredictionCol.nonEmpty) {
-          val predict = classOf[LogisticRegressionModel].getMethod("predict", classOf[Vector]) // -> Double
-          val newColumn = LocalDataColumn(
-            sparkTransformer.getPredictionCol,
-            mappedData.map(predict.invoke(sparkTransformer, _))
-          )
-          newData = newData.withColumn(newColumn)
-        }
-
-        if (sparkTransformer.getRawPredictionCol.nonEmpty) {
-          val predictRaw = classOf[LogisticRegressionModel].getMethod("predictRaw", classOf[Vector])
-          val newColumn = LocalDataColumn(
-            sparkTransformer.getRawPredictionCol,
-            mappedData.map(predictRaw.invoke(sparkTransformer, _).asInstanceOf[Vector].toList)
-          )
-          newData = newData.withColumn(newColumn)
-        }
-
-        if (sparkTransformer.getProbabilityCol.nonEmpty) {
-          val predictProbability = classOf[LogisticRegressionModel].getMethod("predictProbability", classOf[AnyRef])
-          val newColumn = LocalDataColumn(
-            sparkTransformer.getProbabilityCol,
-            mappedData.map(predictProbability.invoke(sparkTransformer, _).asInstanceOf[Vector].toList)
-          )
-          newData = newData.withColumn(newColumn)
-        }
-        newData
-      case None => localData
-    }
-  }
 }
 
 object LocalLogisticRegressionModel extends LocalModel[LogisticRegressionModel] {

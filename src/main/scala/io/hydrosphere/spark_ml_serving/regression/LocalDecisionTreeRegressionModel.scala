@@ -6,22 +6,9 @@ import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 import org.apache.spark.ml.tree.Node
 
-class LocalDecisionTreeRegressionModel(override val sparkTransformer: DecisionTreeRegressionModel) extends LocalTransformer[DecisionTreeRegressionModel] {
-  override def transform(localData: LocalData): LocalData = {
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        val method = classOf[DecisionTreeRegressionModel].getMethod("predict", classOf[Vector])
-        method.setAccessible(true)
-        val newColumn = LocalDataColumn(
-          sparkTransformer.getPredictionCol,
-          column.data.mapToMlVectors.map { vector =>
-            method.invoke(sparkTransformer, vector).asInstanceOf[Double]
-          }
-        )
-        localData.withColumn(newColumn)
-      case None => localData
-    }
-  }
+class LocalDecisionTreeRegressionModel(override val sparkTransformer: DecisionTreeRegressionModel)
+  extends LocalPredictionModel[DecisionTreeRegressionModel] {
+
 }
 
 object LocalDecisionTreeRegressionModel extends LocalModel[DecisionTreeRegressionModel] {

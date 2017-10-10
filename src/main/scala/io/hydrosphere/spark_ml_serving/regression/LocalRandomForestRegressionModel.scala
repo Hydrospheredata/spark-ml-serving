@@ -8,22 +8,9 @@ import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForest
 /**
   * Created by Bulat on 13.04.2017.
   */
-class LocalRandomForestRegressionModel(override val sparkTransformer: RandomForestRegressionModel) extends LocalTransformer[RandomForestRegressionModel] {
-  override def transform(localData: LocalData): LocalData = {
-    val cls = classOf[RandomForestRegressionModel]
-    val predict = cls.getMethod("predict", classOf[Vector])
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        val predictionCol = LocalDataColumn(
-          sparkTransformer.getPredictionCol,
-          column.data.mapToMlVectors.map { vector =>
-            predict.invoke(sparkTransformer, vector).asInstanceOf[Double]
-          }
-        )
-        localData.withColumn(predictionCol)
-      case None => localData
-    }
-  }
+class LocalRandomForestRegressionModel(override val sparkTransformer: RandomForestRegressionModel)
+  extends LocalPredictionModel[RandomForestRegressionModel] {
+
 }
 
 object LocalRandomForestRegressionModel extends LocalModel[RandomForestRegressionModel] {

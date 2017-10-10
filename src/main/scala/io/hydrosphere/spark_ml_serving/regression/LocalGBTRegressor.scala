@@ -6,22 +6,8 @@ import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressionModel, GBTRegressor}
 import org.apache.spark.ml.tree.Node
 
-class LocalGBTRegressor(override val sparkTransformer: GBTRegressionModel)  extends LocalTransformer[GBTRegressionModel] {
-  override def transform(localData: LocalData): LocalData = {
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        val method = classOf[GBTRegressionModel].getMethod("predict", classOf[Vector])
-        method.setAccessible(true)
-        val newColumn = LocalDataColumn(
-          sparkTransformer.getPredictionCol,
-          column.data.mapToMlVectors.map { vector =>
-            method.invoke(sparkTransformer, vector).asInstanceOf[Double]
-          })
-        localData.withColumn(newColumn)
-      case None =>
-        localData
-    }
-  }
+class LocalGBTRegressor(override val sparkTransformer: GBTRegressionModel)
+  extends LocalPredictionModel[GBTRegressionModel] {
 }
 
 object LocalGBTRegressor extends LocalModel[GBTRegressionModel] {

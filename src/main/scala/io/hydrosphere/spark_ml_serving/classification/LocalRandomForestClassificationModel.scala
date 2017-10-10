@@ -1,37 +1,10 @@
 package io.hydrosphere.spark_ml_serving.classification
 
-import io.hydrosphere.spark_ml_serving.DataUtils._
 import io.hydrosphere.spark_ml_serving._
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, RandomForestClassificationModel}
-import org.apache.spark.ml.linalg.Vector
 
-class LocalRandomForestClassificationModel(override val sparkTransformer: RandomForestClassificationModel) extends LocalTransformer[RandomForestClassificationModel] {
-  override def transform(localData: LocalData): LocalData = {
-    localData.column(sparkTransformer.getFeaturesCol) match {
-      case Some(column) =>
-        val cls = classOf[RandomForestClassificationModel]
-
-        val predictRaw = cls.getDeclaredMethod("predictRaw", classOf[Vector])
-        val rawPredictionCol = LocalDataColumn(sparkTransformer.getRawPredictionCol, column.data.mapToMlVectors.map {
-          predictRaw.invoke(sparkTransformer, _).asInstanceOf[Vector].toList
-        })
-
-        val raw2probabilityInPlace = cls.getDeclaredMethod("raw2probabilityInPlace", classOf[Vector])
-        val probabilityCol = LocalDataColumn(sparkTransformer.getProbabilityCol, rawPredictionCol.data.map(_.toMlVector).map { vector =>
-          raw2probabilityInPlace.invoke(sparkTransformer, vector.copy).asInstanceOf[Vector].toList
-        })
-
-        val raw2prediction = cls.getMethod("raw2prediction", classOf[Vector]) // -> Double
-        val predictionCol = LocalDataColumn(sparkTransformer.getPredictionCol, rawPredictionCol.data.map(_.toMlVector).map { vector =>
-          raw2prediction.invoke(sparkTransformer, vector.copy)
-        })
-
-        localData.withColumn(rawPredictionCol)
-          .withColumn(probabilityCol)
-          .withColumn(predictionCol)
-      case None => localData
-    }
-  }
+class LocalRandomForestClassificationModel(override val sparkTransformer: RandomForestClassificationModel)
+  extends LocalProbabilisticClassificationModel[RandomForestClassificationModel] {
 }
 
 object LocalRandomForestClassificationModel extends LocalModel[RandomForestClassificationModel] {
