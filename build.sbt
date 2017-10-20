@@ -33,7 +33,9 @@ lazy val spark_200 = project.in(file("spark-2_0_0"))
     name := "spark-2_0_0-ml-serving",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "2.0.0" % "provided",
-      "org.json4s" %% "json4s-native" % "3.2.10"
+      "org.json4s" %% "json4s-native" % "3.2.10",
+      "org.scalactic" %% "scalactic" % "3.0.3" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.3" % "test"
     )
   )
 
@@ -44,7 +46,9 @@ lazy val spark_220 = project.in(file("spark-2_2_0"))
     name := "spark-2_2_0-ml-serving",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided",
-      "org.json4s" %% "json4s-native" % "3.2.10"
+      "org.json4s" %% "json4s-native" % "3.2.10",
+      "org.scalactic" %% "scalactic" % "3.0.3" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.3" % "test"
     )
   )
 

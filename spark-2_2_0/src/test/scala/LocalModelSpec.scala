@@ -1,3 +1,5 @@
+package io.hydrosphere.spark_ml_serving
+
 import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalDataColumn, PipelineLoader}
 import org.apache.spark.SparkConf
 import org.apache.spark.ml.Pipeline
@@ -7,9 +9,10 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression._
 import org.apache.spark.sql.SparkSession
+import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 
-class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
+class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
   import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
   var session: SparkSession = _
 
@@ -78,7 +81,7 @@ class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
       )
 
       val result = trainedModel.transform(data)
-      result.column("selectedFeatures").get.data === List(List(1.0), List(0.0), List(0.0))
+      result.column("selectedFeatures").get.data === List(List(18.0), List(12.0), List(15.0))
     }
   }
 

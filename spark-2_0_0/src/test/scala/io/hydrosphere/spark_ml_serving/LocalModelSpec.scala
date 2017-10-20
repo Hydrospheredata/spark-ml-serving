@@ -12,7 +12,7 @@ import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 
-class LocalModelSpec extends FunSpec with BeforeAndAfterAll {
+class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
   import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
   var session: SparkSession = _
 
