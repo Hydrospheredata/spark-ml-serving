@@ -1,5 +1,6 @@
 package io.hydrosphere.spark_ml_serving.common.classification
 
+import scala.reflect.runtime.{universe => ru}
 import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalDataColumn, LocalPredictionModel, LocalTransformer}
 import org.apache.spark.ml.classification.ClassificationModel
 import org.apache.spark.ml.linalg.Vector

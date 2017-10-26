@@ -20,7 +20,7 @@ object LocalDecisionTreeRegressionModel extends LocalModel[DecisionTreeRegressio
     val inst = ctor.newInstance(
       metadata.uid,
       DataUtils.createNode(0, metadata, data),
-      metadata.numFeatures.get.asInstanceOf[java.lang.Integer]
+      metadata.numFeatures.getOrElse(0).asInstanceOf[java.lang.Integer]
     )
     inst
       .setFeaturesCol(metadata.paramMap("featuresCol").asInstanceOf[String])

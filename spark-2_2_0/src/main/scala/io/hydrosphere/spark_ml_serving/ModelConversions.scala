@@ -24,7 +24,8 @@ object ModelConversions {
       case _: NaiveBayesModel.type => LocalNaiveBayes
       case _: RandomForestClassificationModel.type => LocalRandomForestClassificationModel
       case _: LogisticRegressionModel.type => LocalLogisticRegressionModel
-
+      case _: GBTClassificationModel.type  => LocalGBTClassificationModel
+      case _: LinearSVCModel.type => LocalLinearSVCModel
         // Clustering models
       case _: GaussianMixtureModel.type => LocalGaussianMixtureModel
       case _: KMeansModel.type  => LocalKMeansModel

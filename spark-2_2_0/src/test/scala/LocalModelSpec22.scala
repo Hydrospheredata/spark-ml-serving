@@ -6,6 +6,7 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression._
 import org.apache.spark.sql.SparkSession
@@ -27,6 +28,42 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
   def compareArrDoubles(a: Seq[Double], b: Seq[Double], threshold: Double = 0.0001): Unit = {
     a.zip(b).foreach{
       case (aa, bb) => compareDoubles(aa, bb, threshold)
+    }
+  }
+
+  describe("TF-IDF") {
+    val path = modelPath("tfidf")
+    var res = LocalData.empty
+    it("should train") {
+      val sentenceData = session.createDataFrame(Seq(
+        (0.0, "Hi I heard about Spark"),
+        (0.0, "I wish Java could use case classes"),
+        (1.0, "Logistic regression models are neat")
+      )).toDF("label", "sentence")
+
+      val tokenizer = new Tokenizer().setInputCol("sentence").setOutputCol("words")
+      val hashingTF = new HashingTF()
+        .setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
+      val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+      val model = new Pipeline().setStages(Array(tokenizer, hashingTF, idf)).fit(sentenceData)
+      res = LocalData.fromDataFrame(model.transform(sentenceData))
+      model.write.overwrite().save(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData(
+        "sentence",
+        List(
+          "Hi I heard about Spark",
+          "I wish Java could use case classes",
+          "Logistic regression models are neat"
+        )
+      )
+      val result = model.transform(localData)
+      val resultList = result.column("features").get.data
+      val validation = res.column("features").get.data.map(_.asInstanceOf[Vector].toArray.toList)
+      assert(resultList === validation)
     }
   }
 
@@ -621,6 +658,94 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  describe("LinearSVC") {
+    val path = modelPath("linearsvc")
+
+    it("should train") {
+      val data = session.createDataFrame(Seq(
+        (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
+        (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
+        (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
+        (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
+        (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
+        (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
+      )).toDF("features", "label")
+
+      val lsvc = new LinearSVC()
+        .setMaxIter(10)
+        .setRegParam(0.1)
+
+      val pipeline = new Pipeline()
+        .setStages(Array(lsvc))
+
+      val model = pipeline.fit(data)
+      model.write.overwrite().save(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData("features", List(
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
+      ))
+      val result = model.transform(localData)
+      val resLabels = result.column("prediction").get.data
+      assert(resLabels === 1.0 :: 0.0 :: Nil)
+    }
+  }
+
+  describe("StringIndexer -> VectorIndexer -> GBTClassifier -> IndexToString ") {
+    val path = modelPath("gbt_classifier")
+
+    it("should train") {
+      val data = session.createDataFrame(Seq(
+        (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
+        (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
+        (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
+        (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
+        (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
+        (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
+      )).toDF("features", "label")
+
+      val labelIndexer = new StringIndexer()
+        .setInputCol("label")
+        .setOutputCol("indexedLabel")
+        .fit(data)
+      val featureIndexer = new VectorIndexer()
+        .setInputCol("features")
+        .setOutputCol("indexedFeatures")
+        .setMaxCategories(4)
+        .fit(data)
+      val gbt = new GBTClassifier()
+        .setLabelCol("indexedLabel")
+        .setFeaturesCol("indexedFeatures")
+        .setMaxIter(10)
+      val labelConverter = new IndexToString()
+        .setInputCol("prediction")
+        .setOutputCol("predictedLabel")
+        .setLabels(labelIndexer.labels)
+
+      val pipeline = new Pipeline()
+        .setStages(Array(labelIndexer, featureIndexer, gbt, labelConverter))
+
+      val model = pipeline.fit(data)
+      model.transform(data).show()
+
+      model.write.overwrite().save(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData("features", List(
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
+      ))
+      val result = model.transform(localData)
+      val resLabels = result.column("predictedLabel").get.data.map(_.asInstanceOf[String])
+      assert(resLabels === "1.0" :: "0.0" :: Nil)
+    }
+  }
+
   describe("StringIndexer -> VectorIndexer -> DecisionTreeClassification -> IndexToString") {
     val path = modelPath("dtreeclassifier")
 
@@ -668,6 +793,43 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
       val result = model.transform(localData)
       val resLabels = result.column("predictedLabel").get.data.map(_.asInstanceOf[String])
       assert(resLabels === "1.0" :: "0.0" :: Nil)
+    }
+  }
+
+  describe("LinearRegression") {
+    val path = modelPath("linearregression")
+
+    it("should train") {
+      val training = session.createDataFrame(Seq(
+        (0L, "a b c d e spark", 1.0),
+        (1L, "b d", 0.0),
+        (2L, "spark f g h", 1.0),
+        (3L, "hadoop mapreduce", 0.0)
+      )).toDF("id", "text", "label")
+      val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+      val hashingTF = new HashingTF().setNumFeatures(1000).setInputCol(tokenizer.getOutputCol).setOutputCol("features")
+      val lr = new LinearRegression()
+        .setMaxIter(10)
+        .setRegParam(0.3)
+        .setElasticNetParam(0.8)
+
+      // Fit the model
+      val model =  new Pipeline().setStages(Array(tokenizer, hashingTF, lr)).fit(training)
+
+      model.write.overwrite().save(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData("text", List(
+        "a b c d e spark",
+        "b d",
+        "spark f g h",
+        "hadoop mapreduce"
+      ))
+      val result = model.transform(localData)
+      val ref = List(0.732142931741881, 0.26785706825811884, 0.732142931741881, 0.26785706825811884)
+      compareArrDoubles(result.column("prediction").get.data.asInstanceOf[List[Double]], ref, 0.001)
     }
   }
 
@@ -820,6 +982,52 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
       ))
       val result = model.transform(localData)
       assert(result.column("prediction").get.data === List(1.0, 0.0, 1.0, 0.0))
+    }
+  }
+
+  describe("VectorIndexer -> GBTRegressor") {
+    val path = modelPath("gbtregressor")
+    it("should train") {
+      val data = session.createDataFrame(Seq(
+        (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
+        (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
+        (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
+        (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
+        (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
+        (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
+      )).toDF("features", "label")
+
+      val featureIndexer = new VectorIndexer()
+        .setInputCol("features")
+        .setOutputCol("indexedFeatures")
+        .setMaxCategories(4)
+        .fit(data)
+
+      // Train a GBT model.
+      val gbt = new GBTRegressor()
+        .setLabelCol("label")
+        .setFeaturesCol("indexedFeatures")
+        .setMaxIter(10)
+
+      // Chain indexer and GBT in a Pipeline.
+      val pipeline = new Pipeline()
+        .setStages(Array(featureIndexer, gbt))
+
+      // Train model. This also runs the indexer.
+      val model = pipeline.fit(data)
+
+      model.write.overwrite().save(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData("features", List(
+        List(1.0, 2.0, 3.0, 4.0, 5.0),
+        List(8.0, 0.0, 5.0, 1.0, 7.0)
+      ))
+      val result = model.transform(localData)
+      val resLabels = result.column("prediction").get.data
+      assert(resLabels === 1.0 :: 0.0 :: Nil)
     }
   }
 

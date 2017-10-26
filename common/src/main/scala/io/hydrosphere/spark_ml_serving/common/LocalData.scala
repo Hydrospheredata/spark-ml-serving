@@ -1,5 +1,7 @@
 package io.hydrosphere.spark_ml_serving.common
 
+import org.apache.spark.sql.DataFrame
+
 import scala.reflect.runtime.{universe => ru}
 
 case class LocalDataColumn[T: ru.TypeTag](name: String, data: List[T]) {
@@ -97,12 +99,23 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
 }
 
 object LocalData {
-
   def apply(columns: LocalDataColumn[_]*): LocalData = {
     new LocalData(columns.toList)
   }
 
   def apply(columns: List[LocalDataColumn[_]]): LocalData = new LocalData(columns)
+
+  def fromDataFrame(df: DataFrame): LocalData = {
+    val fields = df.schema.fieldNames
+    val rows = df.collect()
+    val f = fields.map{field =>
+        LocalDataColumn(
+          field,
+          rows.map(_.getAs[Any](field)).toList
+        )
+    }.toList
+    LocalData(f)
+  }
 
   def fromMapList(mapList: List[Map[String, _]]): LocalData = {
     val keys = mapList.head.keys
