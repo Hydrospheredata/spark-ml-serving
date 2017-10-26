@@ -1,13 +1,13 @@
 package io.hydrosphere.spark_ml_serving.classification
 
-import io.hydrosphere.spark_ml_serving.common.{LocalModel, LocalPredictionModel, LocalTransformer, Metadata}
+import io.hydrosphere.spark_ml_serving.common._
 import org.apache.spark.ml.classification.GBTClassificationModel
 
 class LocalGBTClassificationModel(override val sparkTransformer: GBTClassificationModel)
   extends LocalPredictionModel[GBTClassificationModel] { }
 
 object LocalGBTClassificationModel extends LocalModel[GBTClassificationModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): GBTClassificationModel = {
+  override def load(metadata: Metadata, data: LocalData): GBTClassificationModel = {
     // TODO
     ???
   }

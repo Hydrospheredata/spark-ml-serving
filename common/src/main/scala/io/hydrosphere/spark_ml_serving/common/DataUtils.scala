@@ -75,8 +75,9 @@ object DataUtils {
     }
   }
 
-  def createNode(nodeId: Int, metadata: Metadata, treeData: Map[String, Any]): Node = {
-    val nodeData = treeData(nodeId.toString).asInstanceOf[Map[String, Any]]
+  def createNode(nodeId: Int, metadata: Metadata, treeData: LocalData): Node = {
+    val nodeRows = treeData.toMapList
+    val nodeData = nodeRows.filter{_("id") == nodeId}.head
     val impurity = DataUtils.createImpurityCalculator(
       metadata.paramMap("impurity").asInstanceOf[String],
       nodeData("impurityStats").asInstanceOf[List[Double]].to[Array]

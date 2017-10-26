@@ -25,7 +25,7 @@ class LocalStopWordsRemover(override val sparkTransformer: StopWordsRemover) ext
 }
 
 object LocalStopWordsRemover extends LocalModel[StopWordsRemover] {
-  override def load(metadata: Metadata, data: Map[String, Any]): StopWordsRemover = {
+  override def load(metadata: Metadata, data: LocalData): StopWordsRemover = {
     new StopWordsRemover(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

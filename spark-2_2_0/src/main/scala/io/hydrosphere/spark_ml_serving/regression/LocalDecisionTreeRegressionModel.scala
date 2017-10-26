@@ -10,11 +10,11 @@ class LocalDecisionTreeRegressionModel(override val sparkTransformer: DecisionTr
 }
 
 object LocalDecisionTreeRegressionModel extends LocalModel[DecisionTreeRegressionModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): DecisionTreeRegressionModel = {
+  override def load(metadata: Metadata, data: LocalData): DecisionTreeRegressionModel = {
     createTree(metadata, data)
   }
 
-  def createTree(metadata: Metadata, data: Map[String, Any]): DecisionTreeRegressionModel = {
+  def createTree(metadata: Metadata, data: LocalData): DecisionTreeRegressionModel = {
     val ctor = classOf[DecisionTreeRegressionModel].getDeclaredConstructor(classOf[String], classOf[Node], classOf[Int])
     ctor.setAccessible(true)
     val inst = ctor.newInstance(

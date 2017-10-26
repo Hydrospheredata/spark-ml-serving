@@ -18,7 +18,7 @@ class LocalBinarizer(override val sparkTransformer: Binarizer) extends LocalTran
 }
 
 object LocalBinarizer extends LocalModel[Binarizer] {
-  override def load(metadata: Metadata, data: Map[String, Any]): Binarizer = {
+  override def load(metadata: Metadata, data: LocalData): Binarizer = {
     new Binarizer(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

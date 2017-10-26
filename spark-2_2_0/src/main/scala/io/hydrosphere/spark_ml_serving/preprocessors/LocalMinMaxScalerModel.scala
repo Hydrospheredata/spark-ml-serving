@@ -39,14 +39,14 @@ class LocalMinMaxScalerModel(override val sparkTransformer: MinMaxScalerModel) e
 }
 
 object LocalMinMaxScalerModel extends LocalModel[MinMaxScalerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): MinMaxScalerModel = {
-    val originalMinList = data("originalMin").
+  override def load(metadata: Metadata, data: LocalData): MinMaxScalerModel = {
+    val originalMinList = data.column("originalMin").get.data.head.
       asInstanceOf[Map[String, Any]].
       getOrElse("values", List()).
       asInstanceOf[List[Double]].toArray
     val originalMin = new DenseVector(originalMinList)
 
-    val originalMaxList = data("originalMax").
+    val originalMaxList = data.column("originalMax").get.data.head.
       asInstanceOf[Map[String, Any]].
       getOrElse("values", List()).
       asInstanceOf[List[Double]].toArray

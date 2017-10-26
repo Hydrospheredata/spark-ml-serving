@@ -66,7 +66,7 @@ class SimpleRecord {
             case OriginalType.LIST =>
               val parentName = parent.name
               val record = value.asInstanceOf[SimpleRecord]
-              map += parentName -> record.struct(map.getOrElse(parentName, List.empty[Any]).asInstanceOf[List[Any]])
+              map += parentName -> record.struct(map.getOrElse(parentName, List.empty[Any]).asInstanceOf[List[Any]], subSchema)
             case OriginalType.MAP =>
               val record = value.asInstanceOf[SimpleRecord]
               val values = record.values
@@ -76,7 +76,7 @@ class SimpleRecord {
                 case r: SimpleRecord =>
                   println(subSchema)
                   val nextSchema = subSchema.asGroupType().getType("value")
-                  r.struct(HashMap.empty, nextSchema)
+                  r.struct(HashMap.empty[String, Any], nextSchema)
                 case x => x
               }
               map += k.toString -> v
@@ -95,7 +95,7 @@ class SimpleRecord {
     map
   }
 
-  def struct(acc: List[Any]): List[Any] = {
+  def struct(acc: List[Any], schema: Type): List[Any] = {
     val list = acc.to[ListBuffer]
     for (nameValue <- values) {
       val value = nameValue.value
@@ -103,6 +103,10 @@ class SimpleRecord {
 
       if (name.equals("element") && !classOf[SimpleRecord].isAssignableFrom(value.getClass)) {
         list += value
+      } else if (classOf[SimpleRecord].isAssignableFrom(value.getClass)) {
+        val rec = value.asInstanceOf[SimpleRecord]
+        val subType = schema.asGroupType()
+        list += rec.struct(HashMap.empty, subType.getType(name), nameValue)
       }
     }
     list.to[List]

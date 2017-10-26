@@ -14,6 +14,26 @@ case class LocalDataColumn[T: ru.TypeTag](name: String, data: List[T]) {
 
 class LocalData(private val columnData: List[LocalDataColumn[_]]) {
 
+  def appendToColumn(name: String, data: List[_]): LocalData = {
+    column(name) match {
+      case Some(column) =>
+        val newData = column.data ++ data
+        val otherCols = columnData.filterNot(_ == column)
+        val newCol = LocalDataColumn(
+          name,
+          newData
+        )
+        LocalData(otherCols :+ newCol)
+      case None =>
+        withColumn(
+          LocalDataColumn(
+            name,
+            data
+          )
+        )
+    }
+  }
+
   def withColumn(localDataColumn: LocalDataColumn[_]): LocalData = {
     LocalData(columnData :+ localDataColumn)
   }
@@ -84,4 +104,16 @@ object LocalData {
 
   def apply(columns: List[LocalDataColumn[_]]): LocalData = new LocalData(columns)
 
+  def fromMapList(mapList: List[Map[String, _]]): LocalData = {
+    val keys = mapList.head.keys
+    val columns = keys.map{ key =>
+      LocalDataColumn(
+        key,
+        mapList.map(_(key))
+      )
+    }.toList
+    LocalData(columns)
+  }
+
+  def empty = new LocalData(List.empty)
 }

@@ -21,7 +21,7 @@ object ModelConversions {
       // Classification models
       case _: DecisionTreeClassificationModel.type  => LocalDecisionTreeClassificationModel
       case _: MultilayerPerceptronClassificationModel.type => LocalMultilayerPerceptronClassificationModel
-      case _: NaiveBayes.type => LocalNaiveBayes
+      case _: NaiveBayesModel.type => LocalNaiveBayes
       case _: RandomForestClassificationModel.type => LocalRandomForestClassificationModel
       case _: LogisticRegressionModel.type => LocalLogisticRegressionModel
 
@@ -49,7 +49,7 @@ object ModelConversions {
       case _: VectorIndexerModel.type => LocalVectorIndexerModel
       case _: Word2VecModel.type => LocalWord2VecModel
       case _: IDFModel.type => LocalIDF
-      case _: NaiveBayesModel.type => LocalNaiveBayes
+      case _: ChiSqSelectorModel.type => LocalChiSqSelectorModel
 
         // Regression
       case _: DecisionTreeRegressionModel.type => LocalDecisionTreeRegressionModel

@@ -60,19 +60,20 @@ class LocalVectorIndexerModel(override val sparkTransformer: VectorIndexerModel)
 }
 
 object LocalVectorIndexerModel extends LocalModel[VectorIndexerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): VectorIndexerModel = {
+  override def load(metadata: Metadata, data: LocalData): VectorIndexerModel = {
+
     val ctor = classOf[VectorIndexerModel].getDeclaredConstructor(
       classOf[String],
       classOf[Int],
       classOf[Map[Int, Map[Double, Int]]]
     )
     ctor.setAccessible(true)
-    val categoryMaps = DataUtils.kludgeForVectorIndexer(data("categoryMaps").asInstanceOf[Map[String, Any]])
+    val categoryMaps = DataUtils.kludgeForVectorIndexer(data.column("categoryMaps").get.data.head.asInstanceOf[Map[String, Any]])
     try {
       ctor
         .newInstance(
           metadata.uid,
-          data("numFeatures").asInstanceOf[java.lang.Integer],
+          data.column("numFeatures").get.data.head.asInstanceOf[java.lang.Integer],
           categoryMaps
         )
         .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])

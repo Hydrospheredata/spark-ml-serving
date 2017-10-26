@@ -11,7 +11,7 @@ class LocalImputerModel(override val sparkTransformer: ImputerModel ) extends Lo
 }
 
 object LocalImputerModel extends LocalModel[ImputerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): ImputerModel = {
+  override def load(metadata: Metadata, data: LocalData): ImputerModel = {
     // TODO
     ???
   }

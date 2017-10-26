@@ -10,16 +10,15 @@ class LocalNaiveBayes(override val sparkTransformer: NaiveBayesModel)
 }
 
 object LocalNaiveBayes extends LocalModel[NaiveBayesModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): NaiveBayesModel = {
+  override def load(metadata: Metadata, data: LocalData): NaiveBayesModel = {
     val constructor = classOf[NaiveBayesModel].getDeclaredConstructor(classOf[String], classOf[Vector], classOf[Matrix])
     constructor.setAccessible(true)
-
-    val matrixMetadata = data("theta").asInstanceOf[Map[String, Any]]
+    val matrixMetadata = data.column("theta").get.data.head.asInstanceOf[Map[String, Any]]
     val matrix = DataUtils.constructMatrix(matrixMetadata)
-    val pi = data("pi").
-      asInstanceOf[Map[String, Any]].
-      getOrElse("values", List()).
-      asInstanceOf[List[Double]].toArray
+    val pi = data.column("pi").get.data.head
+        .asInstanceOf[Map[String, Any]]
+        .getOrElse("values", List())
+        .asInstanceOf[List[Double]].toArray
     val piVec = Vectors.dense(pi)
 
     val nb = constructor

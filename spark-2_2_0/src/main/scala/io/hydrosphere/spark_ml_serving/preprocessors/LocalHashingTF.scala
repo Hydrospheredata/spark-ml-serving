@@ -22,7 +22,7 @@ class LocalHashingTF(override val sparkTransformer: HashingTF) extends LocalTran
 }
 
 object LocalHashingTF extends LocalModel[HashingTF] {
-  override def load(metadata: Metadata, data: Map[String, Any]): HashingTF = {
+  override def load(metadata: Metadata, data: LocalData): HashingTF = {
     new HashingTF(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

@@ -6,7 +6,7 @@ import scala.reflect.runtime.universe
 
 object TransformerFactory {
 
-  def apply(metadata: Metadata, data: Map[String, Any]): Transformer = {
+  def apply(metadata: Metadata, data : LocalData): Transformer = {
     import io.hydrosphere.spark_ml_serving.ModelConversions._
     val runtimeMirror = universe.runtimeMirror(this.getClass.getClassLoader)
     val module = runtimeMirror.staticModule(metadata.`class`+ "$")

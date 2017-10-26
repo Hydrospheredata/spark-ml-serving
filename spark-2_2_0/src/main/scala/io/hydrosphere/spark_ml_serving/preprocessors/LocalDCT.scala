@@ -20,7 +20,7 @@ class LocalDCT(override val sparkTransformer: DCT) extends LocalTransformer[DCT]
 }
 
 object LocalDCT extends LocalModel[DCT] {
-  override def load(metadata: Metadata, data: Map[String, Any]): DCT = {
+  override def load(metadata: Metadata, data: LocalData): DCT = {
     new DCT(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

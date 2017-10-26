@@ -9,14 +9,19 @@ class LocalRandomForestClassificationModel(override val sparkTransformer: Random
 }
 
 object LocalRandomForestClassificationModel extends LocalModel[RandomForestClassificationModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): RandomForestClassificationModel = {
-    val treesMetadata = metadata.paramMap("treesMetadata").asInstanceOf[Map[String, Any]]
-    val trees = treesMetadata map { treeKv =>
-      val treeMeta = treeKv._2.asInstanceOf[Map[String, Any]]
-      val meta = treeMeta("metadata").asInstanceOf[Metadata]
+  override def load(metadata: Metadata, data: LocalData): RandomForestClassificationModel = {
+    val dataRows = data.toMapList
+    val treesMetadata = metadata.treesMetadata.get.toMapList
+    val trees = treesMetadata map { treeRow =>
+      val meta = Metadata.fromJson(treeRow("metadata").toString)
+        .copy(
+          numFeatures = metadata.numFeatures,
+          numClasses = metadata.numClasses
+        )
+      val treeNodesData = dataRows.filter(_("treeID") == treeRow("treeID")).map(_("nodeData")).asInstanceOf[List[Map[String, Any]]]
       LocalDecisionTreeClassificationModel.createTree(
         meta,
-        data(treeKv._1).asInstanceOf[Map[String, Any]]
+        LocalData.fromMapList(treeNodesData)
       )
     }
     val ctor = classOf[RandomForestClassificationModel].getDeclaredConstructor(classOf[String], classOf[Array[DecisionTreeClassificationModel]], classOf[Int], classOf[Int])

@@ -16,7 +16,7 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
   import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
   var session: SparkSession = _
 
-  def modelPath(modelName: String): String = s"./target/trained-models-for-test/$modelName"
+  def modelPath(modelName: String): String = s"./target/test_models/spark-2_2_0/$modelName"
 
   def createInputData(name: String, data: List[_]): LocalData = LocalData(LocalDataColumn(name, data))
 
@@ -603,6 +603,8 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
       val model = pipeline.fit(documentDF)
 
       model.write.overwrite().save(path)
+
+      val res = model.transform(documentDF).collect()
     }
 
     it("should load") {
@@ -857,6 +859,54 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
       res.zip(ref).foreach{
         case (resIdx, refIdx) => assert(resIdx === refIdx)
       }
+    }
+  }
+
+  describe("GaussianMixtureModel") {
+    val path = modelPath("gaussian_mixture")
+
+    it("should train") {
+      val data = session.createDataFrame(Seq(
+        (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
+        (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
+        (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
+        (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
+        (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
+        (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
+      )).toDF("features", "label")
+
+      val gmm = new GaussianMixture()
+        .setK(2)
+      val model = new Pipeline().setStages(Array(gmm)).fit(data)
+
+      model.transform(data).show()
+      model.write.overwrite().save(path)
+    }
+
+    it("should load") {
+      PipelineLoader.load(path)
+    }
+
+    it("should transform") {
+      val model = PipelineLoader.load(path)
+      val localData = createInputData("features", List(
+        List(4.0, 0.2, 3.0, 4.0, 5.0),
+        List(8.0, 0.3, 5.0, 1.0, 7.0)
+      ))
+      val result = model.transform(localData)
+//      +--------------------+-----+----------+--------------------+
+//      |            features|label|prediction|         probability|
+//      +--------------------+-----+----------+--------------------+
+//      |[4.0,0.2,3.0,4.0,...|  1.0|         1|[0.16851443539886...|
+//      |[3.0,0.3,1.0,4.1,...|  1.0|         1|[0.00923357272300...|
+//      |[2.0,0.5,3.2,4.0,...|  1.0|         1|[0.19848772999969...|
+//      |[5.0,0.7,1.5,4.0,...|  1.0|         1|[3.88205106565206...|
+//      |[1.0,0.1,7.0,4.0,...|  0.0|         1|[3.82056270025867...|
+//      |[8.0,0.3,5.0,1.0,...|  0.0|         0|[1.0,2.5534671440...|
+//      +--------------------+-----+----------+--------------------+
+      val res = result.column("prediction").get.data.map(_.asInstanceOf[Int])
+      val ref = List(1,0)
+      res === ref
     }
   }
 

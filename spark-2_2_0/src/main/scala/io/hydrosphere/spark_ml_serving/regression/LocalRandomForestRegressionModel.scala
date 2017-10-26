@@ -12,14 +12,15 @@ class LocalRandomForestRegressionModel(override val sparkTransformer: RandomFore
 }
 
 object LocalRandomForestRegressionModel extends LocalModel[RandomForestRegressionModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): RandomForestRegressionModel = {
-    val treesMetadata = metadata.paramMap("treesMetadata").asInstanceOf[Map[String, Any]]
-    val trees = treesMetadata map { treeKv =>
-      val treeMeta = treeKv._2.asInstanceOf[Map[String, Any]]
-      val meta = treeMeta("metadata").asInstanceOf[Metadata]
+  override def load(metadata: Metadata, data: LocalData): RandomForestRegressionModel = {
+    val dataRows = data.toMapList
+    val treesMetadata = metadata.treesMetadata.get.toMapList
+    val trees = treesMetadata map { treeRow =>
+      val meta = Metadata.fromJson(treeRow("metadata").toString).copy(numFeatures = metadata.numFeatures)
+      val treeNodesData = dataRows.filter(_("treeID") == treeRow("treeID")).map(_("nodeData")).asInstanceOf[List[Map[String, Any]]]
       LocalDecisionTreeRegressionModel.createTree(
         meta,
-        data(treeKv._1).asInstanceOf[Map[String, Any]]
+        LocalData.fromMapList(treeNodesData)
       )
     }
     val ctor = classOf[RandomForestRegressionModel].getDeclaredConstructor(classOf[String], classOf[Array[DecisionTreeRegressionModel]], classOf[Int])

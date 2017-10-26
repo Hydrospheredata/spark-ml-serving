@@ -20,7 +20,7 @@ class LocalNormalizer(override val sparkTransformer: Normalizer) extends LocalTr
 }
 
 object LocalNormalizer extends LocalModel[Normalizer] {
-  override def load(metadata: Metadata, data: Map[String, Any]): Normalizer = {
+  override def load(metadata: Metadata, data: LocalData): Normalizer = {
     new Normalizer(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

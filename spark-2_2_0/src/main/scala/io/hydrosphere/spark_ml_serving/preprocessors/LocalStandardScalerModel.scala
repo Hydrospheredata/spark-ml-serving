@@ -26,14 +26,14 @@ class LocalStandardScalerModel(override val sparkTransformer: StandardScalerMode
 }
 
 object LocalStandardScalerModel extends LocalModel[StandardScalerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): StandardScalerModel = {
+  override def load(metadata: Metadata, data: LocalData): StandardScalerModel = {
     val constructor = classOf[StandardScalerModel].getDeclaredConstructor(classOf[String], classOf[Vector], classOf[Vector])
     constructor.setAccessible(true)
 
-    val stdVals = data("std").asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
+    val stdVals = data.column("std").get.data.head.asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
     val std = new DenseVector(stdVals)
 
-    val meanVals = data("mean").asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
+    val meanVals = data.column("mean").get.data.head.asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
     val mean = new DenseVector(meanVals)
     constructor
       .newInstance(metadata.uid, std, mean)

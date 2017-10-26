@@ -16,7 +16,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
   import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
   var session: SparkSession = _
 
-  def modelPath(modelName: String): String = s"./target/trained-models-for-test/$modelName"
+  def modelPath(modelName: String): String = s"./target/test_models/spark-2_0_0/$modelName"
 
   def createInputData(name: String, data: List[_]): LocalData = LocalData(LocalDataColumn(name, data))
 
@@ -52,9 +52,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
         .setOutputCol("selectedFeatures")
 
       val model = new Pipeline().setStages(Array(selector)).fit(df)
-      model.transform(df).show()
       model.write.overwrite().save(path)
-
     }
 
     it("should transform") {

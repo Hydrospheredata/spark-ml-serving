@@ -1,7 +1,7 @@
 package io.hydrosphere.spark_ml_serving.classification
 
 import io.hydrosphere.spark_ml_serving.common.classification.LocalProbabilisticClassificationModel
-import io.hydrosphere.spark_ml_serving.common.{DataUtils, LocalModel, LocalTransformer, Metadata}
+import io.hydrosphere.spark_ml_serving.common._
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.tree.Node
 
@@ -11,11 +11,11 @@ class LocalDecisionTreeClassificationModel(override val sparkTransformer: Decisi
 }
 
 object LocalDecisionTreeClassificationModel extends LocalModel[DecisionTreeClassificationModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): DecisionTreeClassificationModel = {
+  override def load(metadata: Metadata, data: LocalData): DecisionTreeClassificationModel = {
     createTree(metadata, data)
   }
 
-  def createTree(metadata: Metadata, data: Map[String, Any]): DecisionTreeClassificationModel = {
+  def createTree(metadata: Metadata, data: LocalData): DecisionTreeClassificationModel = {
     val ctor = classOf[DecisionTreeClassificationModel].getDeclaredConstructor(classOf[String], classOf[Node], classOf[Int], classOf[Int])
     ctor.setAccessible(true)
     val inst = ctor.newInstance(

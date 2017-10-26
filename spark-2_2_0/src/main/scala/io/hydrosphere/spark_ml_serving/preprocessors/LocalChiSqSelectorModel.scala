@@ -30,10 +30,10 @@ class  LocalChiSqSelectorModel(override val sparkTransformer: ChiSqSelectorModel
 }
 
 object LocalChiSqSelectorModel extends LocalModel[ChiSqSelectorModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): ChiSqSelectorModel = {
+  override def load(metadata: Metadata, data: LocalData): ChiSqSelectorModel = {
     val parentConstructor = classOf[OldChiSqSelectorModel].getDeclaredConstructor(classOf[Array[Int]])
     parentConstructor.setAccessible(true)
-    val selectedFeatures = data("selectedFeatures").asInstanceOf[List[Int]]
+    val selectedFeatures = data.column("selectedFeatures").get.data.head.asInstanceOf[List[Int]]
     val mlk = parentConstructor.newInstance(selectedFeatures.toArray)
 
     val constructor = classOf[ChiSqSelectorModel].getDeclaredConstructor(classOf[String], classOf[OldChiSqSelectorModel])

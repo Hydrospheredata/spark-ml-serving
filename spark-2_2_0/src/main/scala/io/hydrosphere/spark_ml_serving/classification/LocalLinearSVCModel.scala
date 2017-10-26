@@ -1,7 +1,7 @@
 package io.hydrosphere.spark_ml_serving.classification
 
 import io.hydrosphere.spark_ml_serving.common.classification.LocalClassificationModel
-import io.hydrosphere.spark_ml_serving.common.{LocalModel, LocalTransformer, Metadata}
+import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalModel, LocalTransformer, Metadata}
 import org.apache.spark.ml.classification.LinearSVCModel
 
 class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel) extends LocalClassificationModel[LinearSVCModel]{
@@ -9,7 +9,7 @@ class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel) extends
 }
 
 object LocalLinearSVCModel extends LocalModel[LinearSVCModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): LinearSVCModel = {
+  override def load(metadata: Metadata, data: LocalData): LinearSVCModel = {
     // TODO
     ???
   }

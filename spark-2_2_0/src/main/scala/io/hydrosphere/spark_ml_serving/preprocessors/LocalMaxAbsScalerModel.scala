@@ -26,8 +26,8 @@ class LocalMaxAbsScalerModel(override val sparkTransformer: MaxAbsScalerModel) e
 }
 
 object LocalMaxAbsScalerModel extends LocalModel[MaxAbsScalerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): MaxAbsScalerModel = {
-    val maxAbsList = data("maxAbs").
+  override def load(metadata: Metadata, data: LocalData): MaxAbsScalerModel = {
+    val maxAbsList = data.column("maxAbs").get.data.head.
       asInstanceOf[Map[String, Any]].
       getOrElse("values", List()).
       asInstanceOf[List[Double]].toArray

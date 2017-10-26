@@ -8,6 +8,7 @@ object ModelLoader {
 
   private val RandomForestClassifier = "org.apache.spark.ml.classification.RandomForestClassificationModel"
   private val GBTreeRegressor = "org.apache.spark.ml.regression.GBTRegressionModel"
+  private val GBTreeClassifier = "org.apache.spark.ml.classification.GBTClassificationModel"
   private val RandomForestRegressor = "org.apache.spark.ml.regression.RandomForestRegressionModel"
 
 
@@ -15,7 +16,15 @@ object ModelLoader {
     val metadata = source.readFile("metadata/part-00000")
     val pipelineParameters = Metadata.fromJson(metadata)
     val stages: Array[Transformer] = getStages(pipelineParameters, source)
-    val pipeline = TransformerFactory(pipelineParameters, Map("stages" -> stages.toList)).asInstanceOf[PipelineModel]
+    val pipeline = TransformerFactory(
+      pipelineParameters,
+      LocalData(
+        LocalDataColumn(
+          "stages",
+          stages.toList
+        )
+      )
+    ).asInstanceOf[PipelineModel]
     pipeline
   }
 
@@ -30,41 +39,21 @@ object ModelLoader {
 
   def loadTransformer(stageParameters: Metadata, source: ModelSource, stagePath: String): Transformer = {
     stageParameters.`class` match {
-      case RandomForestClassifier | RandomForestRegressor | GBTreeRegressor =>
-        val data = ModelDataReader.parse(source, s"$stagePath/data") map { kv =>
-          kv._1 -> kv._2.asInstanceOf[mutable.Map[String, Any]].toMap
-        }
-        val treesMetadata = ModelDataReader.parse(source, s"$stagePath/treesMetadata") map {kv =>
-          val subMap = kv._2.asInstanceOf[Map[String, Any]]
-          val content = subMap("metadata").toString
-          val metadata = Metadata.fromJson(content)
-          val treeMeta = Metadata(
-            metadata.`class`,
-            metadata.timestamp,
-            metadata.sparkVersion,
-            metadata.uid,
-            metadata.paramMap,
-            stageParameters.numFeatures,
-            stageParameters.numClasses,
-            stageParameters.numTrees
-          )
-          kv._1 -> Map(
-            "metadata" -> treeMeta,
-            "weights" -> subMap("weights").asInstanceOf[java.lang.Double]
-          )
-        }
-        val newParams = stageParameters.paramMap + ("treesMetadata" -> treesMetadata)
+      case RandomForestClassifier | RandomForestRegressor | GBTreeRegressor | GBTreeClassifier =>
+        val data = ModelDataReader.parse(source, s"$stagePath/data")
+        val treesMetadata = ModelDataReader.parse(source, s"$stagePath/treesMetadata")
         val newMetadata = Metadata(
           stageParameters.`class`,
           stageParameters.timestamp,
           stageParameters.sparkVersion,
           stageParameters.uid,
-          newParams,
+          stageParameters.paramMap,
           stageParameters.numFeatures,
           stageParameters.numClasses,
-          stageParameters.numTrees
+          stageParameters.numTrees,
+          Some(treesMetadata)
         )
-        TransformerFactory(newMetadata, data)
+        TransformerFactory(newMetadata,data)
       case _ =>
         val data = ModelDataReader.parse(source, s"$stagePath/data/")
         TransformerFactory(stageParameters, data)

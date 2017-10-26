@@ -24,14 +24,16 @@ class LocalMultilayerPerceptronClassificationModel(override val sparkTransformer
 }
 
 object LocalMultilayerPerceptronClassificationModel extends LocalModel[MultilayerPerceptronClassificationModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): MultilayerPerceptronClassificationModel = {
+  override def load(metadata: Metadata, data: LocalData): MultilayerPerceptronClassificationModel = {
+    val layers = data.column("layers").get.data.head.asInstanceOf[List[Int]].toArray
+    val weights = data.column("weights").get.data.head.asInstanceOf[Map[String, Any]]
     val constructor = classOf[MultilayerPerceptronClassificationModel].getDeclaredConstructor(classOf[String], classOf[Array[Int]], classOf[Vector])
     constructor.setAccessible(true)
     constructor
       .newInstance(
         metadata.uid,
-        data("layers").asInstanceOf[List[Int]].to[Array],
-        Vectors.dense(data("weights").asInstanceOf[Map[String, Any]]("values").asInstanceOf[List[Double]].toArray)
+        layers,
+        Vectors.dense(weights("values").asInstanceOf[List[Double]].toArray)
       )
       .setFeaturesCol(metadata.paramMap("featuresCol").asInstanceOf[String])
       .setPredictionCol(metadata.paramMap("predictionCol").asInstanceOf[String])

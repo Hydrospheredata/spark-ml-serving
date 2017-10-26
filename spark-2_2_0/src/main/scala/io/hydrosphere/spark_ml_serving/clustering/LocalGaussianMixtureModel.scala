@@ -24,11 +24,14 @@ class LocalGaussianMixtureModel(override val sparkTransformer: GaussianMixtureMo
 }
 
 object LocalGaussianMixtureModel extends LocalModel[GaussianMixtureModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): GaussianMixtureModel = {
-    val weights = data("weights").asInstanceOf[List[Double]].toArray
-    val mus = data("mus").asInstanceOf[List[Vector]].toArray
-    val sigmas = data("sigmas").asInstanceOf[List[Matrix]].toArray
-    val gaussians = mus zip sigmas map {
+  override def load(metadata: Metadata, data: LocalData): GaussianMixtureModel = {
+    val weights = data.column("weights").get.data.head.asInstanceOf[List[Double]].toArray
+    val mus = data.column("mus").get.data.head.asInstanceOf[List[Map[String, Any]]]
+    val sigmas = data.column("sigmas").get.data.head.asInstanceOf[List[Map[String, Any]]]
+    val sigMatrices = sigmas.map(DataUtils.constructMatrix)
+    val musVecs = mus.map(DataUtils.constructVector)
+
+    val gaussians = musVecs zip sigMatrices map {
       case (mu, sigma) => new MultivariateGaussian(mu, sigma)
     }
 
@@ -38,7 +41,7 @@ object LocalGaussianMixtureModel extends LocalModel[GaussianMixtureModel] {
         classOf[Array[MultivariateGaussian]]
     )
     constructor.setAccessible(true)
-    var inst = constructor.newInstance(metadata.uid, weights, gaussians)
+    var inst = constructor.newInstance(metadata.uid, weights, gaussians.toArray)
     inst = inst.set(inst.probabilityCol, metadata.paramMap("probabilityCol").asInstanceOf[String])
     inst = inst.set(inst.featuresCol, metadata.paramMap("featuresCol").asInstanceOf[String])
     inst = inst.set(inst.predictionCol, metadata.paramMap("predictionCol").asInstanceOf[String])

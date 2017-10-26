@@ -18,7 +18,7 @@ class LocalTokenizer(override val sparkTransformer: Tokenizer) extends LocalTran
 }
 
 object LocalTokenizer extends LocalModel[Tokenizer] {
-  override def load(metadata: Metadata, data: Map[String, Any]): Tokenizer = {
+  override def load(metadata: Metadata, data: LocalData): Tokenizer = {
     new Tokenizer(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

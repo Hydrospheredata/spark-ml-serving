@@ -31,12 +31,11 @@ class LocalKMeansModel(override val sparkTransformer: KMeansModel) extends Local
 }
 
 object LocalKMeansModel extends LocalModel[KMeansModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): KMeansModel = {
-    val sorted = ListMap(data.toSeq.sortBy { case (key: String, _: Any) => key.toInt}: _*)
-    val centers = sorted map {
-      case (_: String, value: Any) =>
-        val center = value.asInstanceOf[Map[String, Any]]
-        Vectors.dense(center("values").asInstanceOf[List[Double]].to[Array])
+  override def load(metadata: Metadata, data: LocalData): KMeansModel = {
+    val mapRows = data.toMapList
+    val centers = mapRows map { row =>
+      val vec = DataUtils.constructVector(row("clusterCenter").asInstanceOf[Map[String, Any]])
+      org.apache.spark.mllib.linalg.Vectors.fromML(vec)
     }
     val parentConstructor = classOf[OldKMeansModel].getDeclaredConstructor(classOf[Array[MLlibVec]])
     parentConstructor.setAccessible(true)

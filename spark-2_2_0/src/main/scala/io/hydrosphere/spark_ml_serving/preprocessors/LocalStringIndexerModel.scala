@@ -37,8 +37,8 @@ class LocalStringIndexerModel(override val sparkTransformer: StringIndexerModel)
 }
 
 object LocalStringIndexerModel extends LocalModel[StringIndexerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): StringIndexerModel = {
-    new StringIndexerModel(metadata.uid, data("labels").asInstanceOf[List[String]].to[Array])
+  override def load(metadata: Metadata, data: LocalData): StringIndexerModel = {
+    new StringIndexerModel(metadata.uid, data.column("labels").get.data.head.asInstanceOf[List[String]].toArray)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
       .setHandleInvalid(metadata.paramMap("handleInvalid").asInstanceOf[String])

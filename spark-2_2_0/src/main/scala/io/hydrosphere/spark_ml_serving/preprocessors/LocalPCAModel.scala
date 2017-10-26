@@ -19,33 +19,35 @@ class LocalPCAModel(override val sparkTransformer: PCAModel) extends LocalTransf
 }
 
 object LocalPCAModel extends LocalModel[PCAModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): PCAModel = {
+  override def load(metadata: Metadata, data: LocalData): PCAModel = {
     val constructor = classOf[PCAModel].getDeclaredConstructor(classOf[String], classOf[DenseMatrix], classOf[DenseVector])
     constructor.setAccessible(true)
-    if (data.contains("explainedVariance")) {
-      // NOTE: Spark >= 2
-      val numRows = data("pc").asInstanceOf[Map[String, Any]].getOrElse("numRows", 0).asInstanceOf[Int]
-      val numCols = data("pc").asInstanceOf[Map[String, Any]].getOrElse("numCols", 0).asInstanceOf[Int]
-      val pcValues = data("pc").asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
-      val pc = new DenseMatrix(numRows, numCols, pcValues)
+    val pcMap = data.column("pc").get.data.head.asInstanceOf[Map[String, Any]]
+    data.column("explainedVariance") match {
+      case Some(ev) =>
+        // NOTE: Spark >= 2
+        val numRows = pcMap.getOrElse("numRows", 0).asInstanceOf[Int]
+        val numCols = pcMap.getOrElse("numCols", 0).asInstanceOf[Int]
+        val pcValues = pcMap.getOrElse("values", List()).asInstanceOf[List[Double]].toArray
+        val pc = new DenseMatrix(numRows, numCols, pcValues)
 
-      val evValues = data("explainedVariance").asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
-      val explainedVariance = new DenseVector(evValues)
-      constructor
-        .newInstance(metadata.uid, pc, explainedVariance)
-        .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
-        .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
-    } else {
-      // NOTE: Spark < 2
-      val numRows = data("pc").asInstanceOf[Map[String, Any]].getOrElse("numRows", 0).asInstanceOf[Int]
-      val numCols = data("pc").asInstanceOf[Map[String, Any]].getOrElse("numCols", 0).asInstanceOf[Int]
-      val pcValues = data("pc").asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
+        val evValues = ev.data.head.asInstanceOf[Map[String, Any]].getOrElse("values", List()).asInstanceOf[List[Double]].toArray
+        val explainedVariance = new DenseVector(evValues)
+        constructor
+          .newInstance(metadata.uid, pc, explainedVariance)
+          .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
+          .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
+      case None =>
+        // NOTE: Spark < 2
+        val numRows = pcMap.getOrElse("numRows", 0).asInstanceOf[Int]
+        val numCols = pcMap.getOrElse("numCols", 0).asInstanceOf[Int]
+        val pcValues = pcMap.getOrElse("values", List()).asInstanceOf[List[Double]].toArray
 
-      val pc = new OldDenseMatrix(numRows, numCols, pcValues)
-      constructor
-        .newInstance(metadata.uid, pc.asML, Vectors.dense(Array.empty[Double]).asInstanceOf[DenseVector])
-        .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
-        .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
+        val pc = new OldDenseMatrix(numRows, numCols, pcValues)
+        constructor
+          .newInstance(metadata.uid, pc.asML, Vectors.dense(Array.empty[Double]).asInstanceOf[DenseVector])
+          .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
+          .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
     }
   }
 

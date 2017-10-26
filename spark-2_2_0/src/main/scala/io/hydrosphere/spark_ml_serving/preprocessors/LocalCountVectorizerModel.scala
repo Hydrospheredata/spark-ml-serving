@@ -40,8 +40,8 @@ class LocalCountVectorizerModel(override val sparkTransformer: CountVectorizerMo
 }
 
 object LocalCountVectorizerModel extends LocalModel[CountVectorizerModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): CountVectorizerModel = {
-    val vocabulary = data("vocabulary").asInstanceOf[List[String]].toArray
+  override def load(metadata: Metadata, data: LocalData): CountVectorizerModel = {
+    val vocabulary = data.column("vocabulary").get.data.head.asInstanceOf[List[String]].toArray
     val inst = new CountVectorizerModel(metadata.uid, vocabulary)
     inst
       .setInputCol(metadata.paramMap("inputCol").toString)

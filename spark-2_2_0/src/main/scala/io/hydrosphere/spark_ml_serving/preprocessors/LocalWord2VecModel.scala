@@ -57,13 +57,18 @@ class LocalWord2VecModel(override val sparkTransformer: Word2VecModel) extends L
 }
 
 object LocalWord2VecModel extends LocalModel[Word2VecModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): Word2VecModel = {
-    val wordVectors = data("wordVectors").asInstanceOf[List[Float]].toArray
-    val wordIndex = data("wordIndex").asInstanceOf[Map[String, Int]]
-    val oldCtor = classOf[OldWord2VecModel].getConstructor(classOf[Map[String, Int]], classOf[Array[Float]])
+  override def load(metadata: Metadata, data: LocalData): Word2VecModel = {
+    val ctorParams = for {
+      word <- data.column("word")
+      words = word.data.asInstanceOf[List[String]]
+      vector <- data.column("vector")
+      vectors = vector.data.asInstanceOf[List[List[Float]]]
+    } yield {
+      words.zip(vectors.map(_.toArray)).toMap
+    }
+    val oldCtor = classOf[OldWord2VecModel].getConstructor(classOf[Map[String, Array[Float]]])
     oldCtor.setAccessible(true)
-
-    val oldWord2VecModel = oldCtor.newInstance(wordIndex, wordVectors)
+    val oldWord2VecModel = oldCtor.newInstance(ctorParams.get)
 
     val ctor = classOf[Word2VecModel].getConstructor(classOf[String], classOf[OldWord2VecModel])
     ctor.setAccessible(true)
@@ -74,7 +79,7 @@ object LocalWord2VecModel extends LocalModel[Word2VecModel] {
 
     inst
       .set(inst.maxIter, metadata.paramMap("maxIter").asInstanceOf[Number].intValue())
-      .set(inst.seed, metadata.paramMap("seed").toString.toLong) // FIXME why seed is converted to int?
+      .set(inst.seed, metadata.paramMap("seed").toString.toLong)
       .set(inst.numPartitions, metadata.paramMap("numPartitions").asInstanceOf[Number].intValue())
       .set(inst.stepSize, metadata.paramMap("stepSize").asInstanceOf[Double])
       .set(inst.maxSentenceLength, metadata.paramMap("maxSentenceLength").asInstanceOf[Number].intValue())

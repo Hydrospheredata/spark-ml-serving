@@ -29,7 +29,7 @@ class LocalIndexToString(override val sparkTransformer: IndexToString) extends L
 }
 
 object LocalIndexToString extends LocalModel[IndexToString] {
-  override def load(metadata: Metadata, data: Map[String, Any]): IndexToString = {
+  override def load(metadata: Metadata, data: LocalData): IndexToString = {
     val ctor = classOf[IndexToString].getDeclaredConstructor(classOf[String])
     ctor.setAccessible(true)
     ctor

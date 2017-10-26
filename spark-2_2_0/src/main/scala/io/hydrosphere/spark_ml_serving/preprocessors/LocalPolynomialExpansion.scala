@@ -22,7 +22,7 @@ class LocalPolynomialExpansion(override val sparkTransformer: PolynomialExpansio
 }
 
 object LocalPolynomialExpansion extends LocalModel[PolynomialExpansion] {
-  override def load(metadata: Metadata, data: Map[String, Any]): PolynomialExpansion = {
+  override def load(metadata: Metadata, data: LocalData): PolynomialExpansion = {
     new PolynomialExpansion(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

@@ -19,7 +19,7 @@ class LocalNGram(override val sparkTransformer: NGram) extends LocalTransformer[
 }
 
 object LocalNGram extends LocalModel[NGram] {
-  override def load(metadata: Metadata, data: Map[String, Any]): NGram = {
+  override def load(metadata: Metadata, data: LocalData): NGram = {
     new NGram(metadata.uid)
         .setN(metadata.paramMap("n").asInstanceOf[Number].intValue())
         .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])

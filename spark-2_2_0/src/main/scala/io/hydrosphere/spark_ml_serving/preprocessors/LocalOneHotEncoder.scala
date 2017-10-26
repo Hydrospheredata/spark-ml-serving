@@ -32,7 +32,7 @@ class LocalOneHotEncoder(override val sparkTransformer: OneHotEncoder) extends L
 }
 
 object LocalOneHotEncoder extends LocalModel[OneHotEncoder] {
-  override def load(metadata: Metadata, data: Map[String, Any]): OneHotEncoder = {
+  override def load(metadata: Metadata, data: LocalData): OneHotEncoder = {
     var ohe = new OneHotEncoder(metadata.uid)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])

@@ -21,10 +21,10 @@ class LocalPipelineModel(override val sparkTransformer: PipelineModel) extends L
 }
 
 object LocalPipelineModel extends LocalModel[PipelineModel] {
-  override def load(metadata: Metadata, data: Map[String, Any]): PipelineModel = {
+  override def load(metadata: Metadata, data: LocalData): PipelineModel = {
     val constructor = classOf[PipelineModel].getDeclaredConstructor(classOf[String], classOf[java.util.List[Transformer]])
     constructor.setAccessible(true)
-    val stages: java.util.List[Transformer] = data("stages").asInstanceOf[List[Transformer]]
+    val stages: java.util.List[Transformer] = data.column("stages").get.data.asInstanceOf[List[Transformer]]
     constructor.newInstance(metadata.uid, stages)
   }
 
