@@ -33,9 +33,9 @@ lazy val spark_20 = project.in(file("spark-2_0"))
   .settings(commonSettings)
   .dependsOn(common)
   .settings(
-    name := "spark-2_0_0-ml-serving",
+    name := "spark-2_0-ml-serving",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.0.+" % "provided"
+      "org.apache.spark" %% "spark-mllib" % "2.0.2" % "provided"
     ) ++ commonDependencies
   )
 
@@ -43,9 +43,9 @@ lazy val spark_21 = project.in(file("spark-2_1"))
   .settings(commonSettings)
   .dependsOn(common)
   .settings(
-    name := "spark-2_0_0-ml-serving",
+    name := "spark-2_1-ml-serving",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.1.+" % "provided"
+      "org.apache.spark" %% "spark-mllib" % "2.1.2" % "provided"
     ) ++ commonDependencies
   )
 
@@ -53,9 +53,9 @@ lazy val spark_22 = project.in(file("spark-2_2"))
   .settings(commonSettings)
   .dependsOn(common)
   .settings(
-    name := "spark-2_2_0-ml-serving",
+    name := "spark-2_2-ml-serving",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.2.+" % "provided"
+      "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
     ) ++ commonDependencies
   )
 
