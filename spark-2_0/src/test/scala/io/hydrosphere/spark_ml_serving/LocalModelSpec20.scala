@@ -21,7 +21,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
   def createInputData(name: String, data: List[_]): LocalData = LocalData(LocalDataColumn(name, data))
 
   def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001): Unit = {
-    assertgi((a - b).abs < threshold)
+    assert((a - b).abs < threshold)
   }
 
   def compareArrDoubles(a: Seq[Double], b: Seq[Double], threshold: Double = 0.0001): Unit = {
