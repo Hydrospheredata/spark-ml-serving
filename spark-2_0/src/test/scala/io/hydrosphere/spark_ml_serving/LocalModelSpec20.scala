@@ -21,7 +21,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
   def createInputData(name: String, data: List[_]): LocalData = LocalData(LocalDataColumn(name, data))
 
   def compareDoubles(a: Double, b: Double, threshold: Double = 0.0001): Unit = {
-    assert((a - b).abs < threshold)
+    assertgi((a - b).abs < threshold)
   }
 
   def compareArrDoubles(a: Seq[Double], b: Seq[Double], threshold: Double = 0.0001): Unit = {
@@ -1040,12 +1040,12 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
     it("should train") {
       import org.apache.spark.mllib.linalg.{Vectors => OldVectors}
       val data = session.createDataFrame(Seq(
-        (OldVectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
-        (OldVectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
-        (OldVectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
-        (OldVectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
-        (OldVectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
-        (OldVectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
+        (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
+        (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
+        (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
+        (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
+        (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
+        (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
       )).toDF("features", "label")
 
       val gmm = new GaussianMixture()
