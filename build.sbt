@@ -3,6 +3,7 @@ lazy val versionRegex = "(\\d+)\\.(\\d+).*".r
 
 lazy val commonSettings = Seq(
   organization := "io.hydrosphere",
+  version := "0.1.3",
   scalaVersion := "2.11.8",
   sparkVersion := util.Properties.propOrElse("sparkVersion", "2.2.0")
 )
@@ -29,9 +30,11 @@ lazy val common = project.in(file("common"))
     )
   )
 
+
 lazy val spark_20 = project.in(file("spark-2_0"))
   .settings(commonSettings)
   .dependsOn(common)
+  .settings(publishSettings: _*)
   .settings(
     name := "spark-2_0-ml-serving",
     libraryDependencies ++= Seq(
@@ -42,6 +45,7 @@ lazy val spark_20 = project.in(file("spark-2_0"))
 lazy val spark_21 = project.in(file("spark-2_1"))
   .settings(commonSettings)
   .dependsOn(common)
+  .settings(publishSettings: _*)
   .settings(
     name := "spark-2_1-ml-serving",
     libraryDependencies ++= Seq(
@@ -52,6 +56,7 @@ lazy val spark_21 = project.in(file("spark-2_1"))
 lazy val spark_22 = project.in(file("spark-2_2"))
   .settings(commonSettings)
   .dependsOn(common)
+  .settings(publishSettings: _*)
   .settings(
     name := "spark-2_2-ml-serving",
     libraryDependencies ++= Seq(
@@ -59,27 +64,14 @@ lazy val spark_22 = project.in(file("spark-2_2"))
     ) ++ commonDependencies
   )
 
-lazy val currentSpark = util.Properties.propOrElse("sparkVersion", "2.2.+").split('.').toList match {
-  case "2" :: "0" :: _ => spark_20
-  case "2" :: "1" :: _ => spark_21
-  case "2" :: "2" :: _ => spark_22
-  case v => throw new IllegalArgumentException(s"Unsupported Spark version=${v.mkString}")
-}
-
 lazy val examples = project.in(file("examples"))
   .settings(commonSettings)
-  .dependsOn(currentSpark)
+  .dependsOn(spark_22)
   .settings(
-    name := "spark--ml-serving-examples"
+    name := "spark-ml-serving-examples"
   )
 
-lazy val root = project.in(file("."))
-  .settings(commonSettings)
-  .dependsOn(currentSpark)
-  .aggregate(currentSpark)
-  .settings(
-    name := "spark-ml-serving",
-    version := "0.1.2",
+lazy val publishSettings = Seq(
     publishMavenStyle := true,
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
@@ -133,5 +125,4 @@ lazy val root = project.in(file("."))
           <organizationUrl>http://hydrosphere.io/</organizationUrl>
         </developer>
       </developers>
-  )
-
+)
