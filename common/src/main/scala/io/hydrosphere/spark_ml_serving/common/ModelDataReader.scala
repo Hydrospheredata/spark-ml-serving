@@ -49,29 +49,5 @@ object ModelDataReader {
       case (k, v) => result = result.appendToColumn(k, List(v))
     }
     result
-
-    //    if (map.contains("leftChild") && map.contains("rightChild") && map.contains("id")) { // tree structure detected
-    //      acc += map("id").toString -> map
-    //    } else if (map.contains("treeID") && map.contains("nodeData")) { // ensemble structure detected
-    //      if (!acc.contains(map("treeID").toString)) {
-    //        acc += map("treeID").toString -> mutable.Map.empty[String, Map[String, Any]]
-    //      }
-    //      val nodes = acc(map("treeID").toString)
-    //        .asInstanceOf[mutable.Map[String, Map[String, Any]]]
-    //      val nodeData = map("nodeData").asInstanceOf[Map[String, Any]]
-    //      nodes += nodeData("id").toString -> nodeData
-    //    } else if (map.contains("treeID") && map.contains("metadata")) { // ensemble metadata structure detected
-    //      acc += map("treeID").toString -> map
-    //    } else if (map.contains("clusterIdx") && map.contains("clusterCenter")) { // clusters detected
-    //      acc += map("clusterIdx").toString -> map("clusterCenter")
-    //    } else if (acc.keys.toList.containsSlice(map.keys.toSeq)) { // Repeating rows detected
-    //      map.foreach{
-    //        case (k, v) =>
-    //          val rows = acc.getOrElse(k, List.empty[Any]).asInstanceOf[List[Any]]
-    //          acc += k -> (rows :+ v)
-    //      }
-    //    } else {
-    //      acc ++= map
-    //    }
   }
 }
