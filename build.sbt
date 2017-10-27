@@ -16,7 +16,9 @@ lazy val commonDependencies = Seq(
 
 lazy val common = project.in(file("common"))
   .settings(commonSettings)
+  .settings(publishSettings: _*)
   .settings(
+    name := "spark-ml-serving-common",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % sparkVersion.value % "provided",
 
@@ -36,7 +38,7 @@ lazy val spark_20 = project.in(file("spark-2_0"))
   .dependsOn(common)
   .settings(publishSettings: _*)
   .settings(
-    name := "spark-2_0-ml-serving",
+    name := "spark-ml-serving-2_0",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "2.0.2" % "provided"
     ) ++ commonDependencies
@@ -47,7 +49,7 @@ lazy val spark_21 = project.in(file("spark-2_1"))
   .dependsOn(common)
   .settings(publishSettings: _*)
   .settings(
-    name := "spark-2_1-ml-serving",
+    name := "spark-ml-serving-2_1",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "2.1.2" % "provided"
     ) ++ commonDependencies
@@ -58,7 +60,7 @@ lazy val spark_22 = project.in(file("spark-2_2"))
   .dependsOn(common)
   .settings(publishSettings: _*)
   .settings(
-    name := "spark-2_2-ml-serving",
+    name := "spark-ml-serving-2_2",
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
     ) ++ commonDependencies

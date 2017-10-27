@@ -19,11 +19,21 @@ All `Transformer`s are rewritten to accept `LocalData`.
 scalaVersion := "2.11.8"
 // Artifact name is depends of what version of spark are you usng for model training:
 // spark 2.0.x
-libraryDependencies += "io.hydrosphere" %% "spark-2_0-ml-serving" % "0.2.0"
+libraryDependencies += Seq(
+  "io.hydrosphere" %% "spark-ml-serving-2.0" % "0.2.0",
+  "org.apache.spark" %% "spark-mllib" % "2.0.2"
+)
 // spark 2.1.x
-libraryDependencies += "io.hydrosphere" %% "spark-2_1-ml-serving" % "0.2.0"
+libraryDependencies += Seq(
+  "io.hydrosphere" %% "spark-ml-serving-2.1" % "0.2.0",
+  "org.apache.spark" %% "spark-mllib" % "2.1.2"
+)
 // spark 2.2.x
-libraryDependencies += "io.hydrosphere" %% "spark-2_2-ml-serving" % "0.2.0"
+libraryDependencies += Seq(
+  "io.hydrosphere" %% "spark-ml-serving-2.2" % "0.2.0",
+  "org.apache.spark" %% "spark-mllib" % "2.2.0"
+
+)
 ```
 
 2. Use it: [example](/example/src/main/scala/Main.scala)
