@@ -17,4 +17,10 @@ cache:
     - $HOME/.sbt
 
 script:
-  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION test
+  - sbt -DsparkVersion=$SPARK_VERSION -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION test
+
+env:
+  matrix:
+    - SPARK_VERSION=2.0.2
+    - SPARK_VERSION=2.1.2
+    - SPARK_VERSION=2.2.0
