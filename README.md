@@ -14,9 +14,16 @@ All `Transformer`s are rewritten to accept `LocalData`.
 
 ## How to use
 1. Import this project as dependency:
+
 ```scala
 scalaVersion := "2.11.8"
-libraryDependencies += "io.hydrosphere" %% "spark-ml-serving" % "0.1.1"
+// Artifact name is depends of what version of spark are you usng for model training:
+// spark 2.0.x
+libraryDependencies += "io.hydrosphere" %% "spark-2_0-ml-serving" % "0.2.0"
+// spark 2.1.x
+libraryDependencies += "io.hydrosphere" %% "spark-2_1-ml-serving" % "0.2.0"
+// spark 2.2.x
+libraryDependencies += "io.hydrosphere" %% "spark-2_2-ml-serving" % "0.2.0"
 ```
 
 2. Use it: [example](/example/src/main/scala/Main.scala)
