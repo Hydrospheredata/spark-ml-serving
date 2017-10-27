@@ -7,6 +7,12 @@ lazy val commonSettings = Seq(
   sparkVersion := util.Properties.propOrElse("sparkVersion", "2.2.0")
 )
 
+lazy val commonDependencies = Seq(
+  "org.json4s" %% "json4s-native" % "3.2.10",
+  "org.scalactic" %% "scalactic" % "3.0.3" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+)
+
 lazy val common = project.in(file("common"))
   .settings(commonSettings)
   .settings(
@@ -19,40 +25,44 @@ lazy val common = project.in(file("common"))
       "org.apache.parquet" % "parquet-common" % "1.7.0",
       "org.apache.parquet" % "parquet-column" % "1.7.0",
       "org.apache.parquet" % "parquet-hadoop" % "1.7.0",
-      "org.apache.parquet" % "parquet-avro" % "1.7.0",
-
-      "org.scalactic" %% "scalactic" % "3.0.3" % "test",
-      "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+      "org.apache.parquet" % "parquet-avro" % "1.7.0"
     )
   )
 
-lazy val spark_200 = project.in(file("spark-2_0_0"))
+lazy val spark_20 = project.in(file("spark-2_0"))
   .settings(commonSettings)
   .dependsOn(common)
   .settings(
     name := "spark-2_0_0-ml-serving",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.0.0" % "provided",
-      "org.json4s" %% "json4s-native" % "3.2.10"
-    )
+      "org.apache.spark" %% "spark-mllib" % "2.0.+" % "provided"
+    ) ++ commonDependencies
   )
 
-lazy val spark_220 = project.in(file("spark-2_2_0"))
+lazy val spark_21 = project.in(file("spark-2_1"))
+  .settings(commonSettings)
+  .dependsOn(common)
+  .settings(
+    name := "spark-2_0_0-ml-serving",
+    libraryDependencies ++= Seq(
+      "org.apache.spark" %% "spark-mllib" % "2.1.+" % "provided"
+    ) ++ commonDependencies
+  )
+
+lazy val spark_22 = project.in(file("spark-2_2"))
   .settings(commonSettings)
   .dependsOn(common)
   .settings(
     name := "spark-2_2_0-ml-serving",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided",
-      "org.json4s" %% "json4s-native" % "3.2.10",
-      "org.scalactic" %% "scalactic" % "3.0.3" % "test",
-      "org.scalatest" %% "scalatest" % "3.0.3" % "test"
-    )
+      "org.apache.spark" %% "spark-mllib" % "2.2.+" % "provided"
+    ) ++ commonDependencies
   )
 
-lazy val currentSpark = util.Properties.propOrElse("sparkVersion", "2.2.0").split('.').toList match {
-  case "2" :: "0" :: _ => spark_200
-  case "2" :: "2" :: _ => spark_220
+lazy val currentSpark = util.Properties.propOrElse("sparkVersion", "2.2.+").split('.').toList match {
+  case "2" :: "0" :: _ => spark_20
+  case "2" :: "1" :: _ => spark_21
+  case "2" :: "2" :: _ => spark_22
   case v => throw new IllegalArgumentException(s"Unsupported Spark version=${v.mkString}")
 }
 
