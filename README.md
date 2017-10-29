@@ -20,17 +20,17 @@ scalaVersion := "2.11.8"
 // Artifact name is depends of what version of spark are you usng for model training:
 // spark 2.0.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2.0" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_0" % "0.2.0",
   "org.apache.spark" %% "spark-mllib" % "2.0.2"
 )
 // spark 2.1.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2.1" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_1" % "0.2.0",
   "org.apache.spark" %% "spark-mllib" % "2.1.2"
 )
 // spark 2.2.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2.2" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_2" % "0.2.0",
   "org.apache.spark" %% "spark-mllib" % "2.2.0"
 
 )
