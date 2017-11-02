@@ -27,7 +27,7 @@ object Train extends App {
 
    val model = pipeline.fit(df)
    model.write.overwrite().save("./target/countVectorizer")
-}g
+}
 
 object Serve extends App {
 

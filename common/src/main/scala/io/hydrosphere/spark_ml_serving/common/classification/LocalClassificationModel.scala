@@ -18,13 +18,13 @@ abstract class LocalClassificationModel[T <: ClassificationModel[Vector, T]](imp
         sparkTransformer.get(sparkTransformer.rawPredictionCol).foreach{ name =>
           val res = LocalDataColumn(
             name,
-            column.mapAs(predictRaw)
+            column.data.map(_.asInstanceOf[List[Double]]).map(predictRaw)
           )
           result = result.withColumn(res)
         }
 
         sparkTransformer.get(sparkTransformer.predictionCol).foreach{ name =>
-          val res = LocalDataColumn(name, column.mapAs(predict))
+          val res = LocalDataColumn(name, column.data.map(_.asInstanceOf[List[Double]]).map(predict))
           result = result.withColumn(res)
         }
 

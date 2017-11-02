@@ -4,15 +4,7 @@ import org.apache.spark.sql.DataFrame
 
 import scala.reflect.runtime.{universe => ru}
 
-case class LocalDataColumn[T: ru.TypeTag](name: String, data: List[T]) {
-  def mapAs[A: ru.TypeTag, R](func: A => R) = {
-    data match {
-      case x: List[A] if ru.typeOf[T] <:< ru.typeOf[A] => x.asInstanceOf[List[A]].map(func)
-      case _ => throw new IllegalArgumentException(s"Column $name is not typed as List[Double]")
-    }
-  }
-}
-
+case class LocalDataColumn[T: ru.TypeTag](name: String, data: List[T])
 
 class LocalData(private val columnData: List[LocalDataColumn[_]]) {
 
