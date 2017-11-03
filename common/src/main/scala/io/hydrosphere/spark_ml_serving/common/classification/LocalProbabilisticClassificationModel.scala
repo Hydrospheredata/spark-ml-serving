@@ -22,7 +22,7 @@ abstract class LocalProbabilisticClassificationModel[T <: ProbabilisticClassific
         val rawCol = sparkTransformer.get(sparkTransformer.rawPredictionCol).map { name =>
           val res = LocalDataColumn(
             name,
-            column.mapAs(predictRaw)
+            column.data.map(_.asInstanceOf[List[Double]]).map(predictRaw)
           )
           result = result.withColumn(res)
           res
@@ -30,8 +30,8 @@ abstract class LocalProbabilisticClassificationModel[T <: ProbabilisticClassific
 
         val probCol = sparkTransformer.get(sparkTransformer.probabilityCol).map { name =>
           val data = rawCol match {
-            case Some(raw) => raw.mapAs(raw2probability)
-            case None => column.mapAs(predictRaw)
+            case Some(raw) => raw.data.map(_.asInstanceOf[List[Double]]).map(raw2probability)
+            case None => column.data.map(_.asInstanceOf[List[Double]]).map(predictRaw)
           }
           val res = LocalDataColumn(name, data)
           result = result.withColumn(res)
@@ -43,7 +43,7 @@ abstract class LocalProbabilisticClassificationModel[T <: ProbabilisticClassific
             case Some(raw) => raw.data.map(raw2prediction)
             case None => probCol match {
               case Some(prob) => prob.data.map(probability2prediction)
-              case None => column.mapAs(predict)
+              case None => column.data.map(_.asInstanceOf[List[Double]]).map(predict)
             }
           }
           val res = LocalDataColumn(name, data)

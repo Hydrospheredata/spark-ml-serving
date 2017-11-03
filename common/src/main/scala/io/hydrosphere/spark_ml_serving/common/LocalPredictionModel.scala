@@ -15,7 +15,7 @@ abstract class LocalPredictionModel[T <: PredictionModel[Vector, T]](implicit ct
       case Some(column) =>
         val predictionCol = LocalDataColumn(
           sparkTransformer.getPredictionCol,
-          column.mapAs(predict)
+          column.data.map(_.asInstanceOf[List[Double]]).map(predict)
         )
         localData.withColumn(predictionCol)
       case None => localData

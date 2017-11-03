@@ -15,7 +15,7 @@ class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
   import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
   var session: SparkSession = _
 
-  def modelPath(modelName: String): String = s"./target/test_models/spark-2_2_0/$modelName"
+  def modelPath(modelName: String): String = s"./target/test_models/spark-2_1_0/$modelName"
 
   def createInputData(name: String, data: List[_]): LocalData = LocalData(LocalDataColumn(name, data))
 
