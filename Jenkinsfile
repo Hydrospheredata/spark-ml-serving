@@ -27,24 +27,24 @@ node("JenkinsOnDemand") {
     def organization = 'Hydrospheredata'
     def gitCredentialId = 'HydrospheredataGithubAccessKey'
 
+    def sbtOpts = "-Dsbt.override.build.repos=true -Dsbt.repository.config=${env.WORKSPACE}/project/repositories"
     stage('Checkout') {
         checkoutSource(gitCredentialId, organization, repository)
     }
 
     stage('Test') {
         for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
-            project = projects.get(i)         
-            sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m ${project}/test"
+            def project = projects.get(i)         
+            sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -no-colors -J-Xss2m ${project}/test"
         }
     }
 
     if (isReleaseJob()) {
         stage("Publish"){
-            sbtOpts = "-Dsbt.override.build.repos=true -Dsbt.repository.config=${env.WORKSPACE}/project/repositories"
             for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
-                project = projects.get(i)         
-                sh "${env.WORKSPACE}/sbt/sbt 'set pgpPassphrase := Some(Array())' ${project}/publishSigned"
-                sh "${env.WORKSPACE}/sbt/sbt 'project ${project}' 'sonatypeRelease'"
+                def project = projects.get(i)         
+                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} 'set pgpPassphrase := Some(Array())' ${project}/publishSigned"
+                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} 'project ${project}' 'sonatypeRelease'"
             }
         }
     } 
