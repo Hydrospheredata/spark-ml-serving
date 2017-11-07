@@ -26,9 +26,9 @@ node("JenkinsOnDemand") {
     }
 
     stage('Test') {
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_20/test"
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_21/test"
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_22/test"
+        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_20/test"
+        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_21/test"
+        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_22/test"
     }
 
     if (isReleaseJob()) {
