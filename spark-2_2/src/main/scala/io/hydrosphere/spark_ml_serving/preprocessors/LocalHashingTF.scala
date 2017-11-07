@@ -13,7 +13,7 @@ class LocalHashingTF(override val sparkTransformer: HashingTF) extends LocalTran
       case Some(column) =>
         val htf = new HTF(sparkTransformer.getNumFeatures).setBinary(sparkTransformer.getBinary)
         val newData = column.data.map{m =>
-          htf.transform(m.asInstanceOf[mutable.WrappedArray[String]]).toList
+          htf.transform(m.asInstanceOf[List[_]]).toList
         }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
       case None => localData
