@@ -3,7 +3,7 @@ package io.hydrosphere.spark_ml_serving.common
 import breeze.linalg.{DenseVector => BDV, SparseVector => BSV, Vector => BV}
 import org.apache.spark.ml.linalg.{DenseVector, Matrices, Matrix, SparseVector, Vector, Vectors}
 import org.apache.spark.ml.tree._
-import org.apache.spark.mllib.linalg.{SparseVector => OldSparceVector, DenseVector => OldDenseVector, Vector => OldVector}
+import org.apache.spark.mllib.linalg.{SparseVector => OldSparceVector, DenseVector => OldDenseVector, Vector => OldVector, Matrix => OldMatrix}
 
 object DataUtils {
   implicit def mllibVectorToMlVector(v: OldSparceVector): SparseVector = new SparseVector(v.size, v.indices, v.values)
@@ -33,6 +33,17 @@ object DataUtils {
 
   implicit class PumpedMlLibVector(val vec: OldVector) {
     def toList: List[Double] = vec.toArray.toList
+  }
+
+  def convertFromMl(input: Any) = {
+    input match {
+      case x: Seq[_] => x.toList
+      case x: Vector => x.toDense.values.toList
+      case x: OldVector => x.toDense.values.toList
+      case x: Matrix => throw new IllegalArgumentException("Matrices are not supported yet")
+      case x: OldMatrix => throw new IllegalArgumentException("Matrices are not supported yet")
+      case x => x
+    }
   }
 
   def constructMatrix(params: Map[String, Any]): Matrix = {

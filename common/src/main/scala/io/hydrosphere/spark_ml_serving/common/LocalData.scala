@@ -100,11 +100,11 @@ object LocalData {
   def fromDataFrame(df: DataFrame): LocalData = {
     val fields = df.schema.fieldNames
     val rows = df.collect()
-    val f = fields.map{field =>
-        LocalDataColumn(
-          field,
-          rows.map(_.getAs[Any](field)).toList
-        )
+    val f = fields.map { field =>
+      LocalDataColumn(
+        field,
+        rows.map(_.getAs[Any](field)).map(DataUtils.convertFromMl).toList
+      )
     }.toList
     LocalData(f)
   }
