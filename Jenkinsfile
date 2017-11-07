@@ -15,35 +15,37 @@ def isReleaseJob() {
     return tag.startsWith("v")
 }
 
+projects = [
+   "common",
+   "spark_20",
+   "spark_21",
+   "spark_22"
+]
+
 node("JenkinsOnDemand") {
     def repository = 'spark-ml-serving'
     def organization = 'Hydrospheredata'
     def gitCredentialId = 'HydrospheredataGithubAccessKey'
 
     stage('Checkout') {
-        deleteDir()
         checkoutSource(gitCredentialId, organization, repository)
     }
 
     stage('Test') {
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_20/test"
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_21/test"
-        sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m spark_22/test"
+        for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
+            project = projects.get(i)         
+            sh "${env.WORKSPACE}/sbt/sbt -no-colors -J-Xss2m ${project}/test"
+        }
     }
 
     if (isReleaseJob()) {
         stage("Publish"){
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'set pgpPassphrase := Some(Array())' common/publishSigned"
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'project common' 'sonatypeRelease'"
-
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'set pgpPassphrase := Some(Array())' spark_20/publishSigned"
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'project spark_20' 'sonatypeRelease'"
-
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'set pgpPassphrase := Some(Array())' spark_21/publishSigned"
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'project spark_21' 'sonatypeRelease'"
-
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'set pgpPassphrase := Some(Array())' spark_22/publishSigned"
-            sh "${env.WORKSPACE}/sbt/sbt -DsparkVersion=${v} 'project spark_22' 'sonatypeRelease'"
+            sbtOpts = "-Dsbt.override.build.repos=true -Dsbt.repository.config=${env.WORKSPACE}/project/repositories"
+            for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
+                project = projects.get(i)         
+                sh "${env.WORKSPACE}/sbt/sbt 'set pgpPassphrase := Some(Array())' ${project}/publishSigned"
+                sh "${env.WORKSPACE}/sbt/sbt 'project ${project}' 'sonatypeRelease'"
+            }
         }
     } 
 }
