@@ -11,7 +11,7 @@ def checkoutSource(gitCredentialId, organization, repository) {
 
 
 def isReleaseJob() {
-    val tag = sh(returnStdout: true, script: "git tag -l --contains HEAD").trim()
+    def tag = sh(returnStdout: true, script: "git tag -l --contains HEAD").trim()
     return tag.startsWith("v")
 }
 
