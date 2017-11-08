@@ -35,7 +35,7 @@ node("JenkinsOnDemand") {
     stage('Test') {
         for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
             def project = projects.get(i)         
-            sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -no-colors -J-Xss2m ${project}/test"
+            sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} ${project}/test"
         }
     }
 
