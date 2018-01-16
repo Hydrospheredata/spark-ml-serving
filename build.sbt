@@ -114,7 +114,7 @@ lazy val publishSettings = Seq(
         </developer>
         <developer>
           <id>KineticCookie</id>
-          <name>Bulat Luftin</name>
+          <name>Bulat Lutfullin</name>
           <url>https://github.com/KineticCookie</url>
           <organization>Hydrosphere</organization>
           <organizationUrl>http://hydrosphere.io/</organizationUrl>
