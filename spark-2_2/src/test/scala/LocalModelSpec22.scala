@@ -50,7 +50,7 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
           result.column(col).foreach { resData =>
             resData.data.foreach { resRow =>
               if (resRow.isInstanceOf[Seq[_]]) {
-                assert(resRow.isInstanceOf[List[_]])
+                assert(resRow.isInstanceOf[List[_]], resRow)
               } else if (resRow.isInstanceOf[Vector] || resRow.isInstanceOf[OldVector] || resRow.isInstanceOf[Matrix] || resRow.isInstanceOf[OldMatrix]) {
                 assert(false, s"SparkML type detected. Column: $col, value: $resRow")
               }
@@ -584,6 +584,23 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
     ),
     columns = Seq(
       "prediction"
+    )
+  )
+
+  modelTest(
+    data = session.createDataFrame(Seq(
+      (0, "Hi I heard about Spark"),
+      (1, "I wish Java could use case classes"),
+      (2, "Logistic,regression,models,are,neat")
+    )).toDF("id", "sentence"),
+    steps = Seq(
+      new RegexTokenizer()
+        .setInputCol("sentence")
+        .setOutputCol("words")
+        .setPattern("\\W")
+    ),
+    columns = Seq(
+      "words"
     )
   )
 

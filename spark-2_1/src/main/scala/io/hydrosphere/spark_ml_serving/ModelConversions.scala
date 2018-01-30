@@ -50,6 +50,7 @@ object ModelConversions {
       case _: Word2VecModel.type => LocalWord2VecModel
       case _: IDFModel.type => LocalIDF
       case _: ChiSqSelectorModel.type => LocalChiSqSelectorModel
+      case _: RegexTokenizer.type  => LocalRegexTokenizer
 
         // Regression
       case _: DecisionTreeRegressionModel.type => LocalDecisionTreeRegressionModel
