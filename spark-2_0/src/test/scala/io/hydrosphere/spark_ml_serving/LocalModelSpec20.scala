@@ -570,6 +570,23 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
     )
   )
 
+  modelTest(
+    data = session.createDataFrame(Seq(
+      (0, "Hi I heard about Spark"),
+      (1, "I wish Java could use case classes"),
+      (2, "Logistic,regression,models,are,neat")
+    )).toDF("id", "sentence"),
+    steps = Seq(
+      new RegexTokenizer()
+        .setInputCol("sentence")
+        .setOutputCol("words")
+        .setPattern("\\W")
+    ),
+    columns = Seq(
+      "words"
+    )
+  )
+
   override def beforeAll {
     val conf = new SparkConf()
       .setMaster("local[2]")

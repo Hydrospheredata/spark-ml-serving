@@ -5,7 +5,7 @@ lazy val commonSettings = Seq(
   organization := "io.hydrosphere",
   version := "0.2.2",
   scalaVersion := "2.11.8",
-  sparkVersion := util.Properties.propOrElse("sparkVersion", "2.2.0")
+  sparkVersion := util.Properties.propOrElse("sparkVersion", "2.0.0")
 )
 
 lazy val commonDependencies = Seq(
