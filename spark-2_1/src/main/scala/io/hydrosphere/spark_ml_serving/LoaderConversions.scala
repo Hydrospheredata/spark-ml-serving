@@ -1,8 +1,8 @@
 package io.hydrosphere.spark_ml_serving
 
+import io.hydrosphere.spark_ml_serving.common._
 import io.hydrosphere.spark_ml_serving.classification._
 import io.hydrosphere.spark_ml_serving.clustering._
-import io.hydrosphere.spark_ml_serving.common._
 import io.hydrosphere.spark_ml_serving.preprocessors._
 import io.hydrosphere.spark_ml_serving.regression._
 import org.apache.spark.ml.classification._
@@ -11,12 +11,12 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.regression._
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
-object ModelConversions {
-  implicit def sparkToLocal[T <: Transformer](m: Any): LocalModel[T] = {
+object LoaderConversions extends LoaderConverter {
+  implicit def sparkToLocal(m: Any)(implicit conv: TransformerConverter): LocalModelConverter = {
     m match {
-      case _ : PipelineModel.type  => LocalPipelineModel
+      case _ : PipelineModel.type  => new LocalPipelineModelLoader
 
-      case x: LocalModel[T] => x
+      case x: LocalModelConverter => x
 
       // Classification models
       case _: DecisionTreeClassificationModel.type  => LocalDecisionTreeClassificationModel
@@ -25,7 +25,6 @@ object ModelConversions {
       case _: RandomForestClassificationModel.type => LocalRandomForestClassificationModel
       case _: LogisticRegressionModel.type => LocalLogisticRegressionModel
       case _: GBTClassificationModel.type  => LocalGBTClassificationModel
-
         // Clustering models
       case _: GaussianMixtureModel.type => LocalGaussianMixtureModel
       case _: KMeansModel.type  => LocalKMeansModel
@@ -59,7 +58,6 @@ object ModelConversions {
       case _: RandomForestRegressionModel.type => LocalRandomForestRegressionModel
       case _: GBTRegressionModel.type => LocalGBTRegressor
 
-      case _: KMeans.type => LocalKMeansModel
       case _ => throw new Exception(s"Unknown model: ${m.getClass}")
     }
   }

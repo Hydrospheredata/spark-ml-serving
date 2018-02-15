@@ -1,8 +1,8 @@
 package io.hydrosphere.spark_ml_serving
 
-import io.hydrosphere.spark_ml_serving.common._
 import io.hydrosphere.spark_ml_serving.classification._
 import io.hydrosphere.spark_ml_serving.clustering._
+import io.hydrosphere.spark_ml_serving.common._
 import io.hydrosphere.spark_ml_serving.preprocessors._
 import io.hydrosphere.spark_ml_serving.regression._
 import org.apache.spark.ml.classification._
@@ -11,10 +11,10 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.regression._
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
-object ModelConversions {
+object ModelConversions20 extends LoaderConverter {
   implicit def sparkToLocal[T <: Transformer](m: Any): LocalModel[T] = {
     m match {
-      case _ : PipelineModel.type  => LocalPipelineModel
+      case _ : PipelineModel.type  => new LocalPipelineModelLoader()(this)
 
       case x: LocalModel[T] => x
 
@@ -25,6 +25,7 @@ object ModelConversions {
       case _: RandomForestClassificationModel.type => LocalRandomForestClassificationModel
       case _: LogisticRegressionModel.type => LocalLogisticRegressionModel
       case _: GBTClassificationModel.type  => LocalGBTClassificationModel
+
         // Clustering models
       case _: GaussianMixtureModel.type => LocalGaussianMixtureModel
       case _: KMeansModel.type  => LocalKMeansModel

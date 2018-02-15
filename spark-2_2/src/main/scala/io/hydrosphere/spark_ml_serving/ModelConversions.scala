@@ -14,8 +14,6 @@ import org.apache.spark.ml.{PipelineModel, Transformer}
 object ModelConversions {
   implicit def sparkToLocal[T <: Transformer](m: Any): LocalModel[T] = {
     m match {
-      case _ : PipelineModel.type  => LocalPipelineModel
-
       case x: LocalModel[T] => x
 
       // Classification models

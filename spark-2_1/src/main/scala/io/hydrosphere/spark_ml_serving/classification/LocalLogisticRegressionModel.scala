@@ -13,6 +13,7 @@ class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegres
 }
 
 object LocalLogisticRegressionModel extends LocalModel[LogisticRegressionModel] {
+
   override def load(metadata: Metadata, data: LocalData): LogisticRegressionModel = {
     val constructor = classOf[LogisticRegressionModel].getDeclaredConstructor(classOf[String], classOf[Matrix], classOf[Vector], classOf[Int], java.lang.Boolean.TYPE)
     constructor.setAccessible(true)

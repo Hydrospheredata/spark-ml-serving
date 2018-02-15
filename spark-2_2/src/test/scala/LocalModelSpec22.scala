@@ -1,13 +1,13 @@
 package io.hydrosphere.spark_ml_serving
 
-import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalDataColumn, LocalPipelineModel, PipelineLoader}
+import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalDataColumn, LocalPipelineModel}
 import org.apache.spark.SparkConf
 import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.{Matrix, Vector, Vectors}
-import org.apache.spark.mllib.linalg.{Vector => OldVector, Matrix => OldMatrix}
+import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
 import org.apache.spark.ml.regression._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}

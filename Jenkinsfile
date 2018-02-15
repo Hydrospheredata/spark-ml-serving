@@ -15,11 +15,10 @@ def isReleaseJob() {
     return tag.startsWith("v")
 }
 
-projects = [
-   "common",
-   "spark_20",
-   "spark_21",
-   "spark_22"
+sparkVersions = [
+        "2.0.2",
+        "2.1.2",
+        "2.2.0"
 ]
 
 node("JenkinsOnDemand") {
@@ -33,18 +32,18 @@ node("JenkinsOnDemand") {
     }
 
     stage('Test') {
-        for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
-            def project = projects.get(i)         
-            sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} ${project}/test"
+        for (int i = 0; i < sparkVersions.size(); i++) { //TODO switch to each after JENKINS-26481
+            def sparkV = sparkVersions.get(i)
+            sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -DsparkVersion=${sparkV} test"
         }
     }
 
     if (isReleaseJob()) {
         stage("Publish"){
-            for (int i = 0; i < projects.size(); i++) { //TODO switch to each after JENKINS-26481
-                def project = projects.get(i)         
-                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} 'set pgpPassphrase := Some(Array())' ${project}/publishSigned"
-                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} 'project ${project}' 'sonatypeRelease'"
+            for (int i = 0; i < sparkVersions.size(); i++) { //TODO switch to each after JENKINS-26481
+                def sparkV = sparkVersions.get(i)
+                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -DsparkVersion=${sparkV} 'set pgpPassphrase := Some(Array())' publishSigned"
+                sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -DsparkVersion=${sparkV} 'sonatypeRelease'"
             }
         }
     } 

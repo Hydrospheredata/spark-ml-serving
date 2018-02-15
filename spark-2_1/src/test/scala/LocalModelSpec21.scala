@@ -1,18 +1,21 @@
-import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalPipelineModel, PipelineLoader}
+import io.hydrosphere.spark_ml_serving.{LocalPipelineModel, PipelineLoader}
+import io.hydrosphere.spark_ml_serving.common.LocalData
 import org.apache.spark.SparkConf
 import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.{Matrix, Vector, Vectors}
-import org.apache.spark.mllib.linalg.{Vector => OldVector, Matrix => OldMatrix}
+import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
 import org.apache.spark.ml.regression._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 
 class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
-  import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
+  import io.hydrosphere.spark_ml_serving.Implicits._
+  import LocalPipelineModel._
+
   var session: SparkSession = _
 
   def modelPath(modelName: String): String = s"./target/test_models/spark-2_1_0/$modelName"

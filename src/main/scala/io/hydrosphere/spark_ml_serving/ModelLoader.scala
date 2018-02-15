@@ -1,8 +1,7 @@
-package io.hydrosphere.spark_ml_serving.common
+package io.hydrosphere.spark_ml_serving
 
+import io.hydrosphere.spark_ml_serving.common._
 import org.apache.spark.ml.{PipelineModel, Transformer}
-
-import scala.collection.mutable
 
 object ModelLoader {
 
@@ -12,7 +11,7 @@ object ModelLoader {
   private val RandomForestRegressor = "org.apache.spark.ml.regression.RandomForestRegressionModel"
 
 
-  def get(source: ModelSource): PipelineModel = {
+  def get(source: ModelSource)(implicit conv: LoaderConverter, tConv: TransformerConverter): PipelineModel = {
     val metadata = source.readFile("metadata/part-00000")
     val pipelineParameters = Metadata.fromJson(metadata)
     val stages: Array[Transformer] = getStages(pipelineParameters, source)
@@ -28,7 +27,7 @@ object ModelLoader {
     pipeline
   }
 
-  def getStages(pipelineParameters: Metadata, source: ModelSource): Array[Transformer] =
+  def getStages(pipelineParameters: Metadata, source: ModelSource)(implicit conv: LoaderConverter, tConv: TransformerConverter): Array[Transformer] =
     pipelineParameters.paramMap("stageUids").asInstanceOf[List[String]].zipWithIndex.toArray.map {
       case (uid: String, index: Int) =>
         val currentStage = s"stages/${index}_$uid"
@@ -37,7 +36,7 @@ object ModelLoader {
         loadTransformer(stageParameters, source, currentStage)
     }
 
-  def loadTransformer(stageParameters: Metadata, source: ModelSource, stagePath: String): Transformer = {
+  def loadTransformer(stageParameters: Metadata, source: ModelSource, stagePath: String)(implicit conv: LoaderConverter, tConv: TransformerConverter): Transformer = {
     stageParameters.`class` match {
       case RandomForestClassifier | RandomForestRegressor | GBTreeRegressor | GBTreeClassifier =>
         val data = ModelDataReader.parse(source, s"$stagePath/data")

@@ -1,13 +1,14 @@
-package io.hydrosphere.spark_ml_serving.common
+package io.hydrosphere.spark_ml_serving
 
 import java.net.URI
 
+import io.hydrosphere.spark_ml_serving.common.ModelSource
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.ml.PipelineModel
 
 object PipelineLoader {
 
-  def load(path: String): PipelineModel = {
+  def load(path: String)(implicit conv: LoaderConverter, tConv: TransformerConverter): PipelineModel = {
     if (path.startsWith("hdfs://")) {
       val uri = new URI(path)
       val p = uri.getPath
@@ -18,7 +19,7 @@ object PipelineLoader {
     }
   }
 
-  def load(source: ModelSource): PipelineModel = {
+  def load(source: ModelSource)(implicit conv: LoaderConverter, tConv: TransformerConverter): PipelineModel = {
     ModelLoader.get(source)
   }
 
