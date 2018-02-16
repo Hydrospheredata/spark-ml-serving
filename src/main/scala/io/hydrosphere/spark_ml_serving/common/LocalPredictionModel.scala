@@ -5,12 +5,10 @@ import org.apache.spark.ml.linalg.Vector
 
 import scala.reflect.ClassTag
 
-abstract class LocalPredictionModel[T <: PredictionModel[Vector, T]](implicit ct: ClassTag[T]) extends LocalTransformer[T] {
+abstract class LocalPredictionModel[T <: PredictionModel[Vector, T]] extends LocalTransformer[T] {
   def predict(v: List[Double]): Double = invoke[Double]('predict, v)
 
   override def transform(localData: LocalData): LocalData = {
-    val cls = ct.runtimeClass
-
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
         val predictionCol = LocalDataColumn(

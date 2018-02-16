@@ -15,8 +15,6 @@ import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
 
-  import ModelConversions20._
-
   var session: SparkSession = _
 
   def modelPath(modelName: String): String = s"./target/test_models/spark-2_0_0/$modelName"
@@ -39,7 +37,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
       }
 
       it("should load local version") {
-        localPipelineModel = Some(PipelineLoader.load(path))
+        localPipelineModel = Some(LocalPipelineModel.load(path))
         assert(localPipelineModel.isDefined)
       }
 
@@ -92,7 +90,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should load local version") {
-      localPipelineModel = Some(PipelineLoader.load(path))
+      localPipelineModel = Some(LocalPipelineModel.load(path))
       assert(localPipelineModel.isDefined)
     }
 

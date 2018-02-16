@@ -3,7 +3,7 @@ package io.hydrosphere.spark_ml_serving.common
 import java.io.{InputStreamReader, BufferedReader}
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{LocalFileSystem, Path, FileSystem}
+import org.apache.hadoop.fs.{Path, FileSystem}
 
 case class ModelSource(
   root: String,
@@ -14,9 +14,9 @@ case class ModelSource(
     val fsPath = filePath(path)
     val reader = new BufferedReader(new InputStreamReader(fs.open(fsPath)))
 
-    val builder = new StringBuilder()
+    val builder      = new StringBuilder()
     var line: String = null
-    while ({ line = reader.readLine(); line != null}) {
+    while ({ line = reader.readLine(); line != null }) {
       builder.append(line + "\n")
     }
     builder.mkString
@@ -24,7 +24,7 @@ case class ModelSource(
 
   def findFile(dir: String, recursive: Boolean, f: String => Boolean): Option[Path] = {
     val dirPath = filePath(dir)
-    if(fs.exists(dirPath) & fs.isDirectory(dirPath)) {
+    if (fs.exists(dirPath) & fs.isDirectory(dirPath)) {
       val iter = fs.listFiles(dirPath, recursive)
       while (iter.hasNext) {
         val st = iter.next()
@@ -37,7 +37,6 @@ case class ModelSource(
   }
 
   def filePath(path: String): Path = {
-    val rootPath = fs.getWorkingDirectory
     new Path(s"$root/$path")
   }
 
@@ -55,4 +54,3 @@ object ModelSource {
   }
 
 }
-

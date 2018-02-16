@@ -29,7 +29,7 @@ lazy val root = project.in(file("."))
 
       libraryDependencies ++= Seq(
         "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
-        "org.json4s" %% "json4s-native" % "3.2.10",
+        "org.json4s" %% "json4s-native" % "3.2.11",
 
         "com.twitter" % "parquet-hadoop-bundle" % "1.6.0",
         "org.apache.parquet" % "parquet-common" % "1.7.0",

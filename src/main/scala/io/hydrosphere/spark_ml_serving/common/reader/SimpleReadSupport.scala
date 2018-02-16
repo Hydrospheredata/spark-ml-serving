@@ -9,7 +9,12 @@ import parquet.io.api.RecordMaterializer
 import parquet.schema.MessageType
 
 class SimpleReadSupport extends ReadSupport[SimpleRecord] {
-  override def prepareForRead(configuration: Configuration, map: util.Map[String, String], messageType: MessageType, readContext: ReadContext): RecordMaterializer[SimpleRecord] = {
+  override def prepareForRead(
+    configuration: Configuration,
+    map: util.Map[String, String],
+    messageType: MessageType,
+    readContext: ReadContext
+  ): RecordMaterializer[SimpleRecord] = {
     new SimpleRecordMaterializer(messageType)
   }
 

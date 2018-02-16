@@ -1,7 +1,5 @@
 package io.hydrosphere.spark_ml_serving.common
 
-case class SimpleDataFrame(localData: LocalData)
-
 case class Metadata(
   `class`: String,
   timestamp: Long,
@@ -9,9 +7,8 @@ case class Metadata(
   uid: String,
   paramMap: Map[String, Any],
   numFeatures: Option[Int] = None,
-  numClasses: Option[Int] = None,
-  numTrees: Option[Int] = None,
-  treesMetadata: Option[LocalData] = None
+  numClasses: Option[Int]  = None,
+  numTrees: Option[Int]    = None
 )
 
 object Metadata {

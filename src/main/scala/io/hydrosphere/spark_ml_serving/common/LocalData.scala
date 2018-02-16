@@ -1,5 +1,6 @@
 package io.hydrosphere.spark_ml_serving.common
 
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.sql.DataFrame
 
 import scala.reflect.runtime.{universe => ru}
@@ -11,7 +12,7 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
   def appendToColumn(name: String, data: List[_]): LocalData = {
     column(name) match {
       case Some(column) =>
-        val newData = column.data ++ data
+        val newData   = column.data ++ data
         val otherCols = columnData.filterNot(_ == column)
         val newCol = LocalDataColumn(
           name,
@@ -50,7 +51,7 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
   }
 
   def toListMap: Map[String, List[Any]] = {
-    columnData.map{col =>
+    columnData.map { col =>
       col.name -> col.data
     }.toMap
   }
@@ -62,13 +63,18 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
     }
 
     def rowFormat(items: List[String], colSizes: List[Int]): String = {
-      items.zip(colSizes).map((t) => if (t._2 == 0) "" else s"%${t._2}s".format(t._1)).mkString("|", "|", "|")
+      items
+        .zip(colSizes)
+        .map((t) => if (t._2 == 0) "" else s"%${t._2}s".format(t._1))
+        .mkString("|", "|", "|")
     }
 
     var stringParts = List.empty[String]
 
     val rowCount = (for (column <- columnData) yield column.data.length).max
-    val sizes = columnData.map(column => (List(column.name) ++ column.data.map(_.toString)).map(_.length).max + 1)
+    val sizes = columnData.map(
+      column => (List(column.name) ++ column.data.map(_.toString)).map(_.length).max + 1
+    )
 
     stringParts :+= rowSeparator(sizes)
     stringParts :+= rowFormat(columnNames, sizes)
@@ -99,7 +105,7 @@ object LocalData {
 
   def fromDataFrame(df: DataFrame): LocalData = {
     val fields = df.schema.fieldNames
-    val rows = df.collect()
+    val rows   = df.collect()
     val f = fields.map { field =>
       LocalDataColumn(
         field,
@@ -111,7 +117,7 @@ object LocalData {
 
   def fromMapList(mapList: List[Map[String, _]]): LocalData = {
     val keys = mapList.head.keys
-    val columns = keys.map{ key =>
+    val columns = keys.map { key =>
       LocalDataColumn(
         key,
         mapList.map(_(key))

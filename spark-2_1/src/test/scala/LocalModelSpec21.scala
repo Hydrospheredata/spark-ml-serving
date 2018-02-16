@@ -1,20 +1,18 @@
-import io.hydrosphere.spark_ml_serving.{LocalPipelineModel, PipelineLoader}
 import io.hydrosphere.spark_ml_serving.common.LocalData
+import io.hydrosphere.spark_ml_serving.LocalPipelineModel
 import org.apache.spark.SparkConf
-import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg.{Matrix, Vector, Vectors}
-import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
 import org.apache.spark.ml.regression._
+import org.apache.spark.ml.{Pipeline, PipelineStage}
+import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 
 class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
-  import io.hydrosphere.spark_ml_serving.Implicits._
-  import LocalPipelineModel._
 
   var session: SparkSession = _
 
@@ -38,7 +36,7 @@ class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
       }
 
       it("should load local version") {
-        localPipelineModel = Some(PipelineLoader.load(path))
+        localPipelineModel = Some(LocalPipelineModel.load(path))
         assert(localPipelineModel.isDefined)
       }
 
@@ -91,7 +89,7 @@ class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should load local version") {
-      localPipelineModel = Some(PipelineLoader.load(path))
+      localPipelineModel = Some(LocalPipelineModel.load(path))
       assert(localPipelineModel.isDefined)
     }
 

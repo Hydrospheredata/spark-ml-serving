@@ -7,8 +7,9 @@ import parquet.schema.{GroupType, OriginalType, Type}
 
 import scala.collection.JavaConversions._
 
-class SimpleRecordConverter(schema: GroupType, name: String, parent: SimpleRecordConverter) extends GroupConverter {
-  val UTF8: Charset = Charset.forName("UTF-8")
+class SimpleRecordConverter(schema: GroupType, name: String, parent: SimpleRecordConverter)
+  extends GroupConverter {
+  val UTF8: Charset                = Charset.forName("UTF-8")
   val UTF8_DECODER: CharsetDecoder = UTF8.newDecoder()
 
   var converters: Array[Converter] = schema.getFields.map(createConverter).toArray[Converter]
@@ -20,7 +21,7 @@ class SimpleRecordConverter(schema: GroupType, name: String, parent: SimpleRecor
       val originalType = field.getOriginalType
       originalType match {
         case OriginalType.UTF8 => return new StringConverter(field.getName)
-        case _ => Unit
+        case _                 => Unit
       }
 
       return new SimplePrimitiveConverter(field.getName)
