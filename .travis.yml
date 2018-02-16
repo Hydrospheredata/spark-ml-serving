@@ -17,6 +17,6 @@ cache:
     - $HOME/.sbt
 
 script:
-  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_20/test
-  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_21/test
-  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION spark_22/test
+  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION -DsparkVersion=2.0.2 test
+  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION -DsparkVersion=2.1.2 test
+  - sbt -no-colors -J-Xss2m ++$TRAVIS_SCALA_VERSION -DsparkVersion=2.2.0 test

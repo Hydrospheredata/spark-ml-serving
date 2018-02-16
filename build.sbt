@@ -1,77 +1,45 @@
-lazy val sparkVersion: SettingKey[String] = settingKey[String]("Spark version")
+lazy val sparkVersion = util.Properties.propOrElse("sparkVersion", "2.0.2")
+lazy val localSparkVersion = sparkVersion.substring(0,sparkVersion.lastIndexOf(".")).replace('.', '_')
 lazy val versionRegex = "(\\d+)\\.(\\d+).*".r
 
 lazy val commonSettings = Seq(
   organization := "io.hydrosphere",
-  version := "0.2.2",
-  scalaVersion := "2.11.8",
-  sparkVersion := util.Properties.propOrElse("sparkVersion", "2.0.0")
+  version := "0.2.3",
+  scalaVersion := "2.11.8"
 )
 
-lazy val commonDependencies = Seq(
-  "org.json4s" %% "json4s-native" % "3.2.10",
-  "org.scalactic" %% "scalactic" % "3.0.3" % "test",
-  "org.scalatest" %% "scalatest" % "3.0.3" % "test"
-)
+def addSources(sparkDir: String) = {
+  Seq(
+    unmanagedSourceDirectories in Compile += baseDirectory.value / sparkDir / "src" / "main" / "scala",
+    unmanagedSourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "scala"
+  )
+}
 
-lazy val common = project.in(file("common"))
-  .settings(commonSettings)
-  .settings(publishSettings: _*)
-  .settings(
-    name := "spark-ml-serving-common",
-    libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % sparkVersion.value % "provided",
+sparkVersion match {
+  case versionRegex("2", "0") => addSources("spark-2_0")
+  case versionRegex("2", "1") => addSources("spark-2_1")
+  case versionRegex("2", "2") => addSources("spark-2_2")
+}
 
-      "org.json4s" %% "json4s-native" % "3.2.10",
+lazy val root = project.in(file("."))
+    .settings(commonSettings)
+    .settings(publishSettings)
+    .settings(
+      name := s"spark-ml-serving-$localSparkVersion",
 
-      "com.twitter" % "parquet-hadoop-bundle" % "1.6.0",
-      "org.apache.parquet" % "parquet-common" % "1.7.0",
-      "org.apache.parquet" % "parquet-column" % "1.7.0",
-      "org.apache.parquet" % "parquet-hadoop" % "1.7.0",
-      "org.apache.parquet" % "parquet-avro" % "1.7.0"
+      libraryDependencies ++= Seq(
+        "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
+        "org.json4s" %% "json4s-native" % "3.2.11",
+
+        "com.twitter" % "parquet-hadoop-bundle" % "1.6.0",
+        "org.apache.parquet" % "parquet-common" % "1.7.0",
+        "org.apache.parquet" % "parquet-column" % "1.7.0",
+        "org.apache.parquet" % "parquet-hadoop" % "1.7.0",
+        "org.apache.parquet" % "parquet-avro" % "1.7.0",
+        "org.scalactic" %% "scalactic" % "3.0.3" % "test",
+        "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+      )
     )
-  )
-
-
-lazy val spark_20 = project.in(file("spark-2_0"))
-  .settings(commonSettings)
-  .dependsOn(common)
-  .settings(publishSettings: _*)
-  .settings(
-    name := "spark-ml-serving-2_0",
-    libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.0.2" % "provided"
-    ) ++ commonDependencies
-  )
-
-lazy val spark_21 = project.in(file("spark-2_1"))
-  .settings(commonSettings)
-  .dependsOn(common)
-  .settings(publishSettings: _*)
-  .settings(
-    name := "spark-ml-serving-2_1",
-    libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.1.2" % "provided"
-    ) ++ commonDependencies
-  )
-
-lazy val spark_22 = project.in(file("spark-2_2"))
-  .settings(commonSettings)
-  .dependsOn(common)
-  .settings(publishSettings: _*)
-  .settings(
-    name := "spark-ml-serving-2_2",
-    libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
-    ) ++ commonDependencies
-  )
-
-lazy val examples = project.in(file("examples"))
-  .settings(commonSettings)
-  .dependsOn(spark_22)
-  .settings(
-    name := "spark-ml-serving-examples"
-  )
 
 lazy val publishSettings = Seq(
     publishMavenStyle := true,

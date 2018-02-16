@@ -1,17 +1,21 @@
 package io.hydrosphere.spark_ml_serving.classification
 
+import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common.classification.LocalClassificationModel
 import io.hydrosphere.spark_ml_serving.common._
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.classification.LinearSVCModel
 import org.apache.spark.ml.linalg.Vector
 
-class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel) extends LocalClassificationModel[LinearSVCModel]{
+class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel)
+  extends LocalClassificationModel[LinearSVCModel] {
+
   override def transform(localData: LocalData): LocalData = {
     localData.column(sparkTransformer.getFeaturesCol) match {
       case Some(column) =>
         var result = localData
 
-        sparkTransformer.get(sparkTransformer.rawPredictionCol).foreach{ name =>
+        sparkTransformer.get(sparkTransformer.rawPredictionCol).foreach { name =>
           val res = LocalDataColumn(
             name,
             column.data.map(_.asInstanceOf[List[Double]]).map(predictRaw)
@@ -19,8 +23,9 @@ class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel) extends
           result = result.withColumn(res)
         }
 
-        sparkTransformer.get(sparkTransformer.predictionCol).foreach{ name =>
-          val res = LocalDataColumn(name, column.data.map(_.asInstanceOf[List[Double]]).map(predict))
+        sparkTransformer.get(sparkTransformer.predictionCol).foreach { name =>
+          val res =
+            LocalDataColumn(name, column.data.map(_.asInstanceOf[List[Double]]).map(predict))
           result = result.withColumn(res)
         }
 
@@ -30,9 +35,14 @@ class LocalLinearSVCModel(override val sparkTransformer: LinearSVCModel) extends
   }
 }
 
-object LocalLinearSVCModel extends LocalModel[LinearSVCModel] {
-  override def load(metadata: Metadata, data: LocalData): LinearSVCModel = {
-    val coefficients = DataUtils.constructVector(data.column("coefficients").get.data.head.asInstanceOf[Map[String, Any]])
+object LocalLinearSVCModel
+  extends SimpleModelLoader[LinearSVCModel]
+  with TypedTransformerConverter[LinearSVCModel] {
+
+  override def build(metadata: Metadata, data: LocalData): LinearSVCModel = {
+    val coefficients = DataUtils.constructVector(
+      data.column("coefficients").get.data.head.asInstanceOf[Map[String, Any]]
+    )
     val cls = classOf[LinearSVCModel].getConstructor(
       classOf[String],
       classOf[Vector],
@@ -47,9 +57,8 @@ object LocalLinearSVCModel extends LocalModel[LinearSVCModel] {
       .setFeaturesCol(metadata.paramMap("featuresCol").asInstanceOf[String])
       .setPredictionCol(metadata.paramMap("predictionCol").asInstanceOf[String])
       .setRawPredictionCol(metadata.paramMap("rawPredictionCol").asInstanceOf[String])
-
       .set(inst.labelCol, metadata.paramMap("labelCol").toString)
-      .set(inst.aggregationDepth , metadata.paramMap("aggregationDepth").toString.toInt)
+      .set(inst.aggregationDepth, metadata.paramMap("aggregationDepth").toString.toInt)
       .set(inst.fitIntercept, metadata.paramMap("fitIntercept").toString.toBoolean)
       .set(inst.maxIter, metadata.paramMap("maxIter").toString.toInt)
       .set(inst.regParam, metadata.paramMap("regParam").toString.toDouble)
@@ -58,5 +67,6 @@ object LocalLinearSVCModel extends LocalModel[LinearSVCModel] {
       .set(inst.tol, metadata.paramMap("tol").toString.toDouble)
   }
 
-  override implicit def getTransformer(transformer: LinearSVCModel): LocalTransformer[LinearSVCModel] = new LocalLinearSVCModel(transformer)
+  override implicit def toLocal(transformer: LinearSVCModel): LocalTransformer[LinearSVCModel] =
+    new LocalLinearSVCModel(transformer)
 }

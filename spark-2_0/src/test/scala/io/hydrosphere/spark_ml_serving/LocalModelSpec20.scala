@@ -6,16 +6,14 @@ import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
-import org.apache.spark.ml.linalg.{Vector, Vectors, Matrix}
-import org.apache.spark.mllib.linalg.{Vector => OldVector, Matrix => OldMatrix}
+import org.apache.spark.ml.linalg.{Matrix, Vector, Vectors}
+import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
 import org.apache.spark.ml.regression._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 
 class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
-
-  import io.hydrosphere.spark_ml_serving.common.LocalPipelineModel._
 
   var session: SparkSession = _
 
@@ -39,7 +37,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
       }
 
       it("should load local version") {
-        localPipelineModel = Some(PipelineLoader.load(path))
+        localPipelineModel = Some(LocalPipelineModel.load(path))
         assert(localPipelineModel.isDefined)
       }
 
@@ -92,7 +90,7 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
     }
 
     it("should load local version") {
-      localPipelineModel = Some(PipelineLoader.load(path))
+      localPipelineModel = Some(LocalPipelineModel.load(path))
       assert(localPipelineModel.isDefined)
     }
 
