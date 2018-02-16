@@ -4,7 +4,7 @@ lazy val versionRegex = "(\\d+)\\.(\\d+).*".r
 
 lazy val commonSettings = Seq(
   organization := "io.hydrosphere",
-  version := "0.2.3",
+  version := "0.3.0",
   scalaVersion := "2.11.8"
 )
 
