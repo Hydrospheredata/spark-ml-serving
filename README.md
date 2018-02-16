@@ -20,17 +20,17 @@ scalaVersion := "2.11.8"
 // Artifact name is depends of what version of spark are you usng for model training:
 // spark 2.0.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2_0" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_0" % "0.3.0",
   "org.apache.spark" %% "spark-mllib" % "2.0.2"
 )
 // spark 2.1.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2_1" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_1" % "0.3.0",
   "org.apache.spark" %% "spark-mllib" % "2.1.2"
 )
 // spark 2.2.x
 libraryDependencies += Seq(
-  "io.hydrosphere" %% "spark-ml-serving-2_2" % "0.2.0",
+  "io.hydrosphere" %% "spark-ml-serving-2_2" % "0.3.0",
   "org.apache.spark" %% "spark-mllib" % "2.2.0"
 
 )
@@ -42,7 +42,7 @@ import io.hydrosphere.spark_ml_serving._
 import LocalPipelineModel._
 
 // ....
-val model = PipelineLoader.load("PATH_TO_MODEL") // Load
+val model = LocalPipelineModel.load("PATH_TO_MODEL") // Load
 val columns = List(LocalDataColumn("text", Seq("Hello!")))
 val localData = LocalData(columns)
 val result = model.transform(localData) // Transformed result
