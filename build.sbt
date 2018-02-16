@@ -30,7 +30,6 @@ lazy val root = project.in(file("."))
       libraryDependencies ++= Seq(
         "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
         "org.json4s" %% "json4s-native" % "3.2.11",
-
         "com.twitter" % "parquet-hadoop-bundle" % "1.6.0",
         "org.apache.parquet" % "parquet-common" % "1.7.0",
         "org.apache.parquet" % "parquet-column" % "1.7.0",
@@ -62,8 +61,8 @@ lazy val publishSettings = Seq(
         </license>
       </licenses>
       <scm>
-        <url>https://github.com/Hydrospheredata/mist.git</url>
-        <connection>https://github.com/Hydrospheredata/mist.git</connection>
+        <url>https://github.com/Hydrospheredata/spark-ml-serving.git</url>
+        <connection>https://github.com/Hydrospheredata/spark-ml-serving.git</connection>
       </scm>
       <developers>
         <developer>
