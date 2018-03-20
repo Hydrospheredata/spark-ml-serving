@@ -584,6 +584,19 @@ class LocalModelSpec21 extends FunSpec with BeforeAndAfterAll {
     )
   )
 
+  modelTest(
+    data = session.createDataFrame(Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
+    ).toDF("id", "hour", "mobile", "userFeatures", "clicked"),
+    steps = Seq(
+      new VectorAssembler()
+        .setInputCols(Array("hour", "mobile", "userFeatures"))
+        .setOutputCol("features")
+    ),
+    columns = Seq(
+      "words"
+    )
+  )
+
   override def beforeAll {
     val conf = new SparkConf()
       .setMaster("local[2]")

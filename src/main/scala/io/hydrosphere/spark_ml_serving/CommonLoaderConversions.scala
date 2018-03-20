@@ -50,6 +50,7 @@ object CommonLoaderConversions extends DynamicLoaderConverter {
       case _: IDFModel.type             => LocalIDF
       case _: ChiSqSelectorModel.type   => LocalChiSqSelectorModel
       case _: RegexTokenizer.type       => LocalRegexTokenizer
+      case _: VectorAssembler.type      => LocalVectorAssembler
 
       // Regression
       case _: DecisionTreeRegressionModel.type => LocalDecisionTreeRegressionModel
