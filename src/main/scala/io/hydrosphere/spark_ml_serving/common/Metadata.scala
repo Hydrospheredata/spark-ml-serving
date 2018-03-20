@@ -9,7 +9,15 @@ case class Metadata(
   numFeatures: Option[Int] = None,
   numClasses: Option[Int]  = None,
   numTrees: Option[Int]    = None
-)
+) {
+  def getAs[T](name: String): Option[T] = {
+    paramMap.get(name).map(_.asInstanceOf[T])
+  }
+
+  def inputCol = getAs[String]("inputCol")
+
+  def outputCol = getAs[String]("outputCol")
+}
 
 object Metadata {
 
