@@ -50,6 +50,7 @@ object CommonTransormerConversions extends DynamicTransformerConverter {
       case x: IDFModel             => new LocalIDF(x)
       case x: ChiSqSelectorModel   => new LocalChiSqSelectorModel(x)
       case x: RegexTokenizer       => new LocalRegexTokenizer(x)
+      case x: VectorAssembler      => new LocalVectorAssembler(x)
 
       // Regression
       case x: DecisionTreeRegressionModel => new LocalDecisionTreeRegressionModel(x)

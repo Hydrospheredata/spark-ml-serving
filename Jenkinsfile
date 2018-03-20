@@ -46,5 +46,5 @@ node("JenkinsOnDemand") {
                 sh "${env.WORKSPACE}/sbt/sbt ${sbtOpts} -DsparkVersion=${sparkV} 'sonatypeRelease'"
             }
         }
-    } 
+    }
 }
