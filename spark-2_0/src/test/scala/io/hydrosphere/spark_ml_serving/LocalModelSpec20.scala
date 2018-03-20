@@ -12,7 +12,6 @@ import org.apache.spark.ml.regression._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-
 class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
 
   var session: SparkSession = _
@@ -112,6 +111,16 @@ class LocalModelSpec20 extends FunSpec with BeforeAndAfterAll {
       }
     }
   }
+
+  modelTest(
+    data = session.read.format("libsvm").load(getClass.getResource("/data/mllib/sample_lda_libsvm_data.txt").getPath),
+    steps = Seq(
+      new LDA().setK(10).setMaxIter(10)
+    ),
+    columns = Seq(
+      "topicDistribution"
+    )
+  )
 
   modelTest(
     data = session.createDataFrame(

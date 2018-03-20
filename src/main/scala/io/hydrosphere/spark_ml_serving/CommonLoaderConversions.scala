@@ -7,7 +7,7 @@ import io.hydrosphere.spark_ml_serving.preprocessors._
 import io.hydrosphere.spark_ml_serving.regression._
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.classification._
-import org.apache.spark.ml.clustering._
+import org.apache.spark.ml.clustering.{GaussianMixtureModel, KMeansModel, LocalLDAModel => SparkLocalLDAModel}
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.regression._
 
@@ -28,6 +28,7 @@ object CommonLoaderConversions extends DynamicLoaderConverter {
       // Clustering models
       case _: GaussianMixtureModel.type => LocalGaussianMixtureModel
       case _: KMeansModel.type          => LocalKMeansModel
+      case _: SparkLocalLDAModel.type   => LocalLDAModel
 
       // Preprocessing
       case _: Binarizer.type            => LocalBinarizer
