@@ -13,7 +13,7 @@ import scala.collection.mutable
 object ModelDataReader {
 
   def parse(source: ModelSource, path: String): LocalData = {
-    source.findFile(path, true, _.endsWith(".parquet")) match {
+    source.findFile(path, recursive = true, _.endsWith(".parquet")) match {
       case Some(p) => readData(p)
       case None    => LocalData.empty
     }

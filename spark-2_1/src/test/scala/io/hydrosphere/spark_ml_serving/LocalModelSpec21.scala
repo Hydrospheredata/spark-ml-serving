@@ -3,7 +3,7 @@ package io.hydrosphere.spark_ml_serving
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.feature._
 
-class LocalModelSpec20 extends GenericTestSpec {
+class LocalModelSpec21 extends GenericTestSpec {
 
   modelTest(
     data = session
@@ -47,4 +47,5 @@ class LocalModelSpec20 extends GenericTestSpec {
       "prediction"
     )
   )
+
 }
