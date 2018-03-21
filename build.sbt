@@ -1,10 +1,10 @@
-lazy val sparkVersion = util.Properties.propOrElse("sparkVersion", "2.2.0")
+lazy val sparkVersion = util.Properties.propOrElse("sparkVersion", "2.0.2")
 lazy val localSparkVersion = sparkVersion.substring(0,sparkVersion.lastIndexOf(".")).replace('.', '_')
 lazy val versionRegex = "(\\d+)\\.(\\d+).*".r
 
 lazy val commonSettings = Seq(
   organization := "io.hydrosphere",
-  version := "0.3.0",
+  version := "0.3.1",
   scalaVersion := "2.11.8"
 )
 
