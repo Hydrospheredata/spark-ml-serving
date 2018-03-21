@@ -13,7 +13,7 @@ class LocalVectorAssembler(override val sparkTransformer: VectorAssembler)
     if (sparkTransformer.getInputCols.isEmpty) {
       localData
     } else {
-      val co = sparkTransformer.getInputCols.toSeq.map { inName =>
+      val co = sparkTransformer.getInputCols.toList.map { inName =>
         localData.column(inName) match {
           case Some(inCol) =>
             inCol.data.map {
@@ -28,20 +28,22 @@ class LocalVectorAssembler(override val sparkTransformer: VectorAssembler)
 
       val colLen = co.headOption.getOrElse(throw new IllegalArgumentException("Input data is empty")).length
 
-      val result = mutable.ArrayBuffer.empty[Seq[Double]]
+      val builder = mutable.ArrayBuffer.empty[Seq[Double]]
       var idx = 0
       while (idx < colLen) {
         val row = co.map { column =>
           column(idx)
         }
-        result += row.flatten
+        builder += row.flatten
         idx += 1
       }
+
+      val result = builder.toList
 
       localData.withColumn(
         LocalDataColumn(
           sparkTransformer.getOutputCol,
-          result.toList
+          result
         )
       )
     }

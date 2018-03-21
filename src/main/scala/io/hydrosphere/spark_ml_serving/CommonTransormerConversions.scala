@@ -1,24 +1,14 @@
 package io.hydrosphere.spark_ml_serving
 
 import io.hydrosphere.spark_ml_serving.classification._
-import io.hydrosphere.spark_ml_serving.clustering.{LocalGaussianMixtureModel, LocalKMeansModel}
+import io.hydrosphere.spark_ml_serving.clustering._
 import io.hydrosphere.spark_ml_serving.common.LocalTransformer
 import io.hydrosphere.spark_ml_serving.preprocessors._
-import io.hydrosphere.spark_ml_serving.regression.{
-  LocalDecisionTreeRegressionModel,
-  LocalGBTRegressor,
-  LocalLinearRegressionModel,
-  LocalRandomForestRegressionModel
-}
+import io.hydrosphere.spark_ml_serving.regression._
 import org.apache.spark.ml.classification._
-import org.apache.spark.ml.clustering.{GaussianMixtureModel, KMeansModel}
+import org.apache.spark.ml.clustering.{GaussianMixtureModel, KMeansModel, LocalLDAModel => SparkLocalLDAModel}
 import org.apache.spark.ml.feature._
-import org.apache.spark.ml.regression.{
-  DecisionTreeRegressionModel,
-  GBTRegressionModel,
-  LinearRegressionModel,
-  RandomForestRegressionModel
-}
+import org.apache.spark.ml.regression._
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
 object CommonTransormerConversions extends DynamicTransformerConverter {
@@ -37,6 +27,7 @@ object CommonTransormerConversions extends DynamicTransformerConverter {
       // Clustering models
       case x: GaussianMixtureModel => new LocalGaussianMixtureModel(x)
       case x: KMeansModel          => new LocalKMeansModel(x)
+      case x: SparkLocalLDAModel   => new LocalLDAModel(x)
 
       // Preprocessing
       case x: Binarizer            => new LocalBinarizer(x)

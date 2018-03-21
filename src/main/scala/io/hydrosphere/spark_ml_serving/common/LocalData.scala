@@ -81,7 +81,7 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
     stringParts :+= rowSeparator(sizes)
     for (rowNumber <- List.range(0, rowCount)) {
       val row = columnData.map { (column) =>
-        if (column.data.length <= rowNumber) {
+        if (column.data.lengthCompare(rowNumber) <= 0) {
           "–"
         } else {
           column.data(rowNumber).toString

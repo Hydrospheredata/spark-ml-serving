@@ -1,116 +1,12 @@
 package io.hydrosphere.spark_ml_serving
 
-import io.hydrosphere.spark_ml_serving.common.{LocalData}
-import org.apache.spark.SparkConf
-import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.clustering._
 import org.apache.spark.ml.feature._
-import org.apache.spark.ml.linalg.{Matrix, Vector, Vectors}
-import org.apache.spark.mllib.linalg.{Matrix => OldMatrix, Vector => OldVector}
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression._
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-
-class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
-  var session: SparkSession = _
-
-  def modelPath(modelName: String): String = s"./target/test_models/spark-2_2_0/$modelName"
-
-  def modelTest(data: => DataFrame, steps: => Seq[PipelineStage], columns: => Seq[String]): Unit = {
-    lazy val name = steps.map(_.getClass.getSimpleName).foldLeft(""){
-      case ("", b) => b
-      case (a, b) => a + "-" + b
-    }
-    describe(name) {
-      val path = modelPath(name.toLowerCase())
-      var validation = LocalData.empty
-      var localPipelineModel = Option.empty[LocalPipelineModel]
-
-      it("should train") {
-        val pipeline = new Pipeline().setStages(steps.toArray)
-        val pipelineModel = pipeline.fit(data)
-        validation = LocalData.fromDataFrame(pipelineModel.transform(data))
-        pipelineModel.write.overwrite().save(path)
-      }
-
-      it("should load local version") {
-        localPipelineModel = Some(LocalPipelineModel.load(path))
-        assert(localPipelineModel.isDefined)
-      }
-
-      it("should transform LocalData") {
-        val localData = LocalData.fromDataFrame(data)
-        val model = localPipelineModel.get
-        val result = model.transform(localData)
-        columns.foreach { col =>
-          assert(result.column(col) === validation.column(col), s"'$col' column comparison")
-          result.column(col).foreach { resData =>
-            resData.data.foreach { resRow =>
-              if (resRow.isInstanceOf[Seq[_]]) {
-                assert(resRow.isInstanceOf[List[_]], resRow)
-              } else if (resRow.isInstanceOf[Vector] || resRow.isInstanceOf[OldVector] || resRow.isInstanceOf[Matrix] || resRow.isInstanceOf[OldMatrix]) {
-                assert(false, s"SparkML type detected. Column: $col, value: $resRow")
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  describe("StringIndexer-IndexToString") {
-    var validation = LocalData.empty
-    var localPipelineModel = Option.empty[LocalPipelineModel]
-    val path = modelPath("indextostring")
-    lazy val data = session.createDataFrame(Seq(
-      (0, "a"),
-      (1, "b"),
-      (2, "c"),
-      (3, "a"),
-      (4, "a"),
-      (5, "c")
-    )).toDF("id", "category")
-    val columns = Seq("originalCategory")
-
-    it("should train") {
-      val indexer = new StringIndexer()
-        .setInputCol("category")
-        .setOutputCol("categoryIndex")
-        .fit(data)
-      val converter = new IndexToString()
-        .setInputCol("categoryIndex")
-        .setOutputCol("originalCategory")
-        .setLabels(indexer.labels)
-      val pipeline = new Pipeline().setStages(Array(indexer, converter)).fit(data)
-      validation = LocalData.fromDataFrame(pipeline.transform(data))
-      pipeline.write.overwrite().save(path)
-    }
-
-    it("should load local version") {
-      localPipelineModel = Some(LocalPipelineModel.load(path))
-      assert(localPipelineModel.isDefined)
-    }
-
-    it("should transform LocalData") {
-      val localData = LocalData.fromDataFrame(data)
-      val model = localPipelineModel.get
-      val result = model.transform(localData)
-      columns.foreach { col =>
-        assert(result.column(col) === validation.column(col), s"'$col' column comparison")
-        result.column(col).foreach { resData =>
-          resData.data.foreach { resRow =>
-            if (resRow.isInstanceOf[Seq[_]]) {
-              assert(resRow.isInstanceOf[List[_]])
-            } else if (resRow.isInstanceOf[Vector] || resRow.isInstanceOf[OldVector] || resRow.isInstanceOf[Matrix] || resRow.isInstanceOf[OldMatrix]) {
-              assert(false, s"SparkML type detected. Column: $col, value: $resRow")
-            }
-          }
-        }
-      }
-    }
-  }
+class CommonModelsSpec extends GenericTestSpec {
 
   modelTest(
     data = session.createDataFrame(
@@ -347,24 +243,6 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
 
   modelTest(
     data = session.createDataFrame(Seq(
-      "Hi I heard about Spark".split(" "),
-      "I wish Java could use case classes".split(" "),
-      "Logistic regression models are neat".split(" ")
-    ).map(Tuple1.apply)).toDF("text"),
-    steps = Seq(
-      new Word2Vec()
-        .setInputCol("text")
-        .setOutputCol("result")
-        .setVectorSize(3)
-        .setMinCount(0)
-    ),
-    columns = Seq(
-      "result"
-    )
-  )
-
-  modelTest(
-    data = session.createDataFrame(Seq(
       (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
       (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
       (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
@@ -387,7 +265,7 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
           .setMaxIter(10)
       ),
     columns = Seq(
-      "predictedLabel"
+      "prediction"
     )
   )
 
@@ -413,7 +291,7 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
         .setFeaturesCol("indexedFeatures")
     ),
     columns = Seq(
-      "predictedLabel"
+      "prediction"
     )
   )
 
@@ -433,7 +311,7 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
         .setElasticNetParam(0.8)
     ),
     columns = Seq(
-      "predictedLabel"
+      "prediction"
     )
   )
 
@@ -492,22 +370,6 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
     )
   )
 
-  modelTest(
-    data = session.createDataFrame(Seq(
-      (0L, "a b c d e spark", 1.0),
-      (1L, "b d", 0.0),
-      (2L, "spark f g h", 1.0),
-      (3L, "hadoop mapreduce", 0.0)
-    )).toDF("id", "text", "label"),
-    steps = Seq(
-      new Tokenizer().setInputCol("text").setOutputCol("words"),
-      new HashingTF().setNumFeatures(1000).setInputCol("words").setOutputCol("features"),
-      new LogisticRegression().setMaxIter(10).setRegParam(0.01)
-    ),
-    columns = Seq(
-      "prediction"
-    )
-  )
 
   modelTest(
     data = session.createDataFrame(Seq(
@@ -569,25 +431,6 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
 
   modelTest(
     data = session.createDataFrame(Seq(
-      (Vectors.dense(4.0, 0.2, 3.0, 4.0, 5.0), 1.0),
-      (Vectors.dense(3.0, 0.3, 1.0, 4.1, 5.0), 1.0),
-      (Vectors.dense(2.0, 0.5, 3.2, 4.0, 5.0), 1.0),
-      (Vectors.dense(5.0, 0.7, 1.5, 4.0, 5.0), 1.0),
-      (Vectors.dense(1.0, 0.1, 7.0, 4.0, 5.0), 0.0),
-      (Vectors.dense(8.0, 0.3, 5.0, 1.0, 7.0), 0.0)
-    )).toDF("features", "label"),
-    steps = Seq(
-      new LinearSVC()
-        .setMaxIter(10)
-        .setRegParam(0.1)
-    ),
-    columns = Seq(
-      "prediction"
-    )
-  )
-
-  modelTest(
-    data = session.createDataFrame(Seq(
       (0, "Hi I heard about Spark"),
       (1, "I wish Java could use case classes"),
       (2, "Logistic,regression,models,are,neat")
@@ -612,20 +455,19 @@ class LocalModelSpec22 extends FunSpec with BeforeAndAfterAll {
         .setOutputCol("features")
     ),
     columns = Seq(
-      "words"
+      "features"
     )
   )
 
-  override def beforeAll {
-    val conf = new SparkConf()
-      .setMaster("local[2]")
-      .setAppName("test")
-      .set("spark.ui.enabled", "false")
-
-    session = SparkSession.builder().config(conf).getOrCreate()
-  }
-
-  override def afterAll: Unit = {
-    session.stop()
-  }
+  modelTest(
+    data = session.read.format("libsvm")
+      .load(getClass.getResource("/data/mllib/sample_lda_libsvm_data.txt").getPath),
+    steps = Seq(
+      new LDA().setK(10).setMaxIter(10)
+    ),
+    columns = Seq(
+      "topicDistribution"
+    ),
+    accuracy = 1
+  )
 }
