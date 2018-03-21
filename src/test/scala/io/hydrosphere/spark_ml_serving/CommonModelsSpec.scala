@@ -458,4 +458,16 @@ class CommonModelsSpec extends GenericTestSpec {
       "features"
     )
   )
+
+  modelTest(
+    data = session.read.format("libsvm")
+      .load(getClass.getResource("/data/mllib/sample_lda_libsvm_data.txt").getPath),
+    steps = Seq(
+      new LDA().setK(10).setMaxIter(10)
+    ),
+    columns = Seq(
+      "topicDistribution"
+    ),
+    accuracy = 1
+  )
 }
