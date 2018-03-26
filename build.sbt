@@ -12,7 +12,7 @@ def addSources(sparkDir: String) = {
   Seq(
     unmanagedSourceDirectories in Compile += baseDirectory.value / sparkDir / "src" / "main" / "scala",
     unmanagedSourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "scala",
-    resourceDirectory in Test := baseDirectory.value / sparkDir / "src" / "test" / "resources"
+    unmanagedResourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "resources"
   )
 }
 
