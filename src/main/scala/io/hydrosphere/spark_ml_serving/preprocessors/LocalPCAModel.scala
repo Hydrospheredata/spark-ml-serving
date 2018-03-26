@@ -3,6 +3,7 @@ package io.hydrosphere.spark_ml_serving.preprocessors
 import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common.utils.DataUtils._
 import io.hydrosphere.spark_ml_serving.common._
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.feature.PCAModel
 import org.apache.spark.ml.linalg.{DenseMatrix, DenseVector, Vectors}
 import org.apache.spark.mllib.linalg.{DenseMatrix => OldDenseMatrix, Matrices => OldMatrices}
@@ -29,35 +30,23 @@ object LocalPCAModel extends SimpleModelLoader[PCAModel] with TypedTransformerCo
     )
     constructor.setAccessible(true)
     val pcMap = data.column("pc").get.data.head.asInstanceOf[Map[String, Any]]
+    val pcMat = DataUtils.constructMatrix(pcMap).toDense
     data.column("explainedVariance") match {
       case Some(ev) =>
         // NOTE: Spark >= 2
-        val numRows  = pcMap.getOrElse("numRows", 0).asInstanceOf[Int]
-        val numCols  = pcMap.getOrElse("numCols", 0).asInstanceOf[Int]
-        val pcValues = pcMap.getOrElse("values", List()).asInstanceOf[List[Double]].toArray
-        val pc       = new DenseMatrix(numRows, numCols, pcValues)
+        val evParams = ev.data.head.asInstanceOf[Map[String, Any]]
+        val explainedVariance = DataUtils.constructVector(evParams).toDense
 
-        val evValues = ev.data.head
-          .asInstanceOf[Map[String, Any]]
-          .getOrElse("values", List())
-          .asInstanceOf[List[Double]]
-          .toArray
-        val explainedVariance = new DenseVector(evValues)
         constructor
-          .newInstance(metadata.uid, pc, explainedVariance)
+          .newInstance(metadata.uid, pcMat, explainedVariance)
           .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
           .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
       case None =>
         // NOTE: Spark < 2
-        val numRows  = pcMap.getOrElse("numRows", 0).asInstanceOf[Int]
-        val numCols  = pcMap.getOrElse("numCols", 0).asInstanceOf[Int]
-        val pcValues = pcMap.getOrElse("values", List()).asInstanceOf[List[Double]].toArray
-
-        val pc = new OldDenseMatrix(numRows, numCols, pcValues)
         constructor
           .newInstance(
             metadata.uid,
-            pc.asML,
+            pcMat,
             Vectors.dense(Array.empty[Double]).asInstanceOf[DenseVector]
           )
           .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])

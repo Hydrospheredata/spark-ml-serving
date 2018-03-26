@@ -10,7 +10,7 @@ class LocalNGram(override val sparkTransformer: NGram) extends LocalTransformer[
       case Some(column) =>
         val method = classOf[NGram].getMethod("createTransformFunc")
         val f      = method.invoke(sparkTransformer).asInstanceOf[Seq[String] => Seq[String]]
-        val data = column.data.map(_.asInstanceOf[List[String]]).map { row =>
+        val data = column.data.map(_.asInstanceOf[Seq[String]]).map { row =>
           f.apply(row).toList
         }
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, data))

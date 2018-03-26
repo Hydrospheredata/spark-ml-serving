@@ -41,7 +41,7 @@ object LocalChiSqSelectorModel
     val parentConstructor =
       classOf[OldChiSqSelectorModel].getDeclaredConstructor(classOf[Array[Int]])
     parentConstructor.setAccessible(true)
-    val selectedFeatures = data.column("selectedFeatures").get.data.head.asInstanceOf[List[Int]]
+    val selectedFeatures = data.column("selectedFeatures").get.data.head.asInstanceOf[Seq[Int]]
     val mlk              = parentConstructor.newInstance(selectedFeatures.toArray)
 
     val constructor = classOf[ChiSqSelectorModel]

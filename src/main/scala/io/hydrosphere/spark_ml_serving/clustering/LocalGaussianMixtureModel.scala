@@ -30,9 +30,9 @@ object LocalGaussianMixtureModel
   with TypedTransformerConverter[GaussianMixtureModel] {
 
   override def build(metadata: Metadata, data: LocalData): GaussianMixtureModel = {
-    val weights     = data.column("weights").get.data.head.asInstanceOf[List[Double]].toArray
-    val mus         = data.column("mus").get.data.head.asInstanceOf[List[Map[String, Any]]]
-    val sigmas      = data.column("sigmas").get.data.head.asInstanceOf[List[Map[String, Any]]]
+    val weights     = data.column("weights").get.data.head.asInstanceOf[Seq[Double]].toArray
+    val mus         = data.column("mus").get.data.head.asInstanceOf[Seq[Map[String, Any]]]
+    val sigmas      = data.column("sigmas").get.data.head.asInstanceOf[Seq[Map[String, Any]]]
     val sigMatrices = sigmas.map(DataUtils.constructMatrix)
     val musVecs     = mus.map(DataUtils.constructVector)
 

@@ -15,9 +15,8 @@ class LocalMaxAbsScalerModel(override val sparkTransformer: MaxAbsScalerModel)
         val maxAbsUnzero =
           Vectors.dense(sparkTransformer.maxAbs.toArray.map(x => if (x == 0) 1 else x))
         val newData = column.data.map(r => {
-          val vec: List[Double] = r match {
-            case d: List[Double] => d
-            case d: List[Int]    => d.map(_.toDouble)
+          val vec = r match {
+            case d: Seq[Number] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
             case d =>
               throw new IllegalArgumentException(s"Unknown data type for LocalMaxAbsScaler: $d")
           }
@@ -34,16 +33,8 @@ object LocalMaxAbsScalerModel
   extends SimpleModelLoader[MaxAbsScalerModel]
   with TypedTransformerConverter[MaxAbsScalerModel] {
   override def build(metadata: Metadata, data: LocalData): MaxAbsScalerModel = {
-    val maxAbsList = data
-      .column("maxAbs")
-      .get
-      .data
-      .head
-      .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val maxAbs = new DenseVector(maxAbsList)
+    val maxAbsParams = data.column("maxAbs").get.data.head.asInstanceOf[Map[String, Any]]
+    val maxAbs = DataUtils.constructVector(maxAbsParams)
 
     val constructor =
       classOf[MaxAbsScalerModel].getDeclaredConstructor(classOf[String], classOf[Vector])

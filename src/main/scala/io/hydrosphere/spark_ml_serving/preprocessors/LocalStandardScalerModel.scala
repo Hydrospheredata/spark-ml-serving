@@ -3,8 +3,9 @@ package io.hydrosphere.spark_ml_serving.preprocessors
 import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common.utils.DataUtils._
 import io.hydrosphere.spark_ml_serving.common._
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.feature.StandardScalerModel
-import org.apache.spark.ml.linalg.{DenseVector, Vector}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.mllib.feature.{StandardScalerModel => OldStandardScalerModel}
 import org.apache.spark.mllib.linalg.{Vectors => OldVectors}
 
@@ -14,8 +15,8 @@ class LocalStandardScalerModel(override val sparkTransformer: StandardScalerMode
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
         val scaler = new OldStandardScalerModel(
-          OldVectors.fromML(sparkTransformer.std.asInstanceOf[Vector]),
-          OldVectors.fromML(sparkTransformer.mean.asInstanceOf[Vector]),
+          OldVectors.fromML(sparkTransformer.std),
+          OldVectors.fromML(sparkTransformer.mean),
           sparkTransformer.getWithStd,
           sparkTransformer.getWithMean
         )
@@ -39,27 +40,11 @@ object LocalStandardScalerModel
     )
     constructor.setAccessible(true)
 
-    val stdVals = data
-      .column("std")
-      .get
-      .data
-      .head
-      .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val std = new DenseVector(stdVals)
+    val stdParams = data.column("std").get.data.head.asInstanceOf[Map[String, Any]]
+    val std = DataUtils.constructVector(stdParams)
 
-    val meanVals = data
-      .column("mean")
-      .get
-      .data
-      .head
-      .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val mean = new DenseVector(meanVals)
+    val meanParams = data.column("mean").get.data.head.asInstanceOf[Map[String, Any]]
+    val mean = DataUtils.constructVector(meanParams)
     constructor
       .newInstance(metadata.uid, std, mean)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])

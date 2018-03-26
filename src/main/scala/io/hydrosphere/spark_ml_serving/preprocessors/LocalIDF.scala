@@ -3,6 +3,7 @@ package io.hydrosphere.spark_ml_serving.preprocessors
 import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common.utils.DataUtils._
 import io.hydrosphere.spark_ml_serving.common._
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.feature.IDFModel
 import org.apache.spark.mllib.feature.{IDFModel => OldIDFModel}
 import org.apache.spark.mllib.linalg.{Vector => OldVector, Vectors => OldVectors}
@@ -34,22 +35,19 @@ class LocalIDF(override val sparkTransformer: IDFModel) extends LocalTransformer
 object LocalIDF extends SimpleModelLoader[IDFModel] with TypedTransformerConverter[IDFModel] {
 
   override def build(metadata: Metadata, data: LocalData): IDFModel = {
-    val idfValues = data
+    val idfParams = data
       .column("idf")
       .get
       .data
       .head
       .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
 
-    val vector            = OldVectors.dense(idfValues)
+    val idfVector            = OldVectors.fromML(DataUtils.constructVector(idfParams))
     val oldIDFconstructor = classOf[OldIDFModel].getDeclaredConstructor(classOf[OldVector])
 
     oldIDFconstructor.setAccessible(true)
 
-    val oldIDF = oldIDFconstructor.newInstance(vector)
+    val oldIDF = oldIDFconstructor.newInstance(idfVector)
     val const  = classOf[IDFModel].getDeclaredConstructor(classOf[String], classOf[OldIDFModel])
     val idf    = const.newInstance(metadata.uid, oldIDF)
     idf

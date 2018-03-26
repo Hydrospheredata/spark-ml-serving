@@ -25,14 +25,14 @@ object LocalGBTClassificationModel
       val treeNodesData = dataRows
         .filter(_("treeID") == treeRow("treeID"))
         .map(_("nodeData"))
-        .asInstanceOf[List[Map[String, Any]]]
+        .asInstanceOf[Seq[Map[String, Any]]]
       LocalDecisionTreeRegressionModel.createTree(
         meta,
-        LocalData.fromMapList(treeNodesData)
+        LocalData.fromMapList(treeNodesData.toList)
       )
     }
     val weights =
-      treeData.column("weights").get.data.asInstanceOf[List[Double]].toArray
+      treeData.column("weights").get.data.asInstanceOf[Seq[Double]].toArray
     val ctor = classOf[GBTClassificationModel].getDeclaredConstructor(
       classOf[String],
       classOf[Array[DecisionTreeRegressionModel]],

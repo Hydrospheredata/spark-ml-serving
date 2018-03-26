@@ -30,8 +30,7 @@ object LocalLogisticRegressionModel
     val coefficientMatrix = DataUtils.constructMatrix(coefficientMatrixParams)
     val interceptVectorParams =
       data.column("interceptVector").get.data.head.asInstanceOf[Map[String, Any]]
-    val interceptVector =
-      Vectors.dense(interceptVectorParams("values").asInstanceOf[List[Double]].toArray[Double])
+    val interceptVector = DataUtils.constructVector(interceptVectorParams)
     constructor
       .newInstance(
         metadata.uid,

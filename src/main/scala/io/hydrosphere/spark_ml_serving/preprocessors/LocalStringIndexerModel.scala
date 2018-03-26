@@ -47,7 +47,7 @@ object LocalStringIndexerModel
   override def build(metadata: Metadata, data: LocalData): StringIndexerModel = {
     new StringIndexerModel(
       metadata.uid,
-      data.column("labels").get.data.head.asInstanceOf[List[String]].toArray
+      data.column("labels").get.data.head.asInstanceOf[Seq[String]].toArray
     ).setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
       .setHandleInvalid(metadata.paramMap("handleInvalid").asInstanceOf[String])

@@ -63,7 +63,7 @@ object LocalWord2VecModel
   with TypedTransformerConverter[Word2VecModel] {
 
   override def build(metadata: Metadata, data: LocalData): Word2VecModel = {
-    val wordVectors = data.column("wordVectors").get.data.head.asInstanceOf[List[Float]].toArray
+    val wordVectors = data.column("wordVectors").get.data.head.asInstanceOf[Seq[Float]].toArray
     val wordIndex   = data.column("wordIndex").get.data.head.asInstanceOf[Map[String, Int]]
     val oldCtor =
       classOf[OldWord2VecModel].getConstructor(classOf[Map[String, Int]], classOf[Array[Float]])

@@ -21,9 +21,8 @@ class LocalMinMaxScalerModel(override val sparkTransformer: MinMaxScalerModel)
       case Some(column) =>
         val newData = column.data.map(r => {
           val scale = max - min
-          val vec: List[Double] = r match {
-            case d: List[Double] => d
-            case d: List[Int]    => d.map(_.toDouble)
+          val vec = r match {
+            case d: Seq[Number] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
             case d =>
               throw new IllegalArgumentException(s"Unknown data type for LocalMinMaxScaler: $d")
           }
@@ -56,10 +55,8 @@ object LocalMinMaxScalerModel
       .data
       .head
       .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val originalMin = new DenseVector(originalMinList)
+
+    val originalMin = DataUtils.constructVector(originalMinList)
 
     val originalMaxList = data
       .column("originalMax")
@@ -67,10 +64,8 @@ object LocalMinMaxScalerModel
       .data
       .head
       .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val originalMax = new DenseVector(originalMaxList)
+
+    val originalMax = DataUtils.constructVector(originalMaxList)
 
     val constructor = classOf[MinMaxScalerModel].getDeclaredConstructor(
       classOf[String],
