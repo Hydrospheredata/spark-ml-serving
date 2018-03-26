@@ -16,7 +16,7 @@ class LocalMaxAbsScalerModel(override val sparkTransformer: MaxAbsScalerModel)
           Vectors.dense(sparkTransformer.maxAbs.toArray.map(x => if (x == 0) 1 else x))
         val newData = column.data.map(r => {
           val vec = r match {
-            case d: Seq[Number] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
+            case d: Seq[Number @unchecked] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
             case d =>
               throw new IllegalArgumentException(s"Unknown data type for LocalMaxAbsScaler: $d")
           }

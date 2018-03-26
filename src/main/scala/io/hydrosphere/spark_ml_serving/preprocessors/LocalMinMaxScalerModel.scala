@@ -22,7 +22,7 @@ class LocalMinMaxScalerModel(override val sparkTransformer: MinMaxScalerModel)
         val newData = column.data.map(r => {
           val scale = max - min
           val vec = r match {
-            case d: Seq[Number] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
+            case d: Seq[Number @unchecked] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
             case d =>
               throw new IllegalArgumentException(s"Unknown data type for LocalMinMaxScaler: $d")
           }

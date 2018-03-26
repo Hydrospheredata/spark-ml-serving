@@ -1,4 +1,4 @@
-lazy val sparkVersion = util.Properties.propOrElse("sparkVersion", "2.2.1")
+lazy val sparkVersion = util.Properties.propOrElse("sparkVersion", "2.0.2")
 lazy val localSparkVersion = sparkVersion.substring(0,sparkVersion.lastIndexOf(".")).replace('.', '_')
 lazy val versionRegex = "(\\d+)\\.(\\d+).*".r
 

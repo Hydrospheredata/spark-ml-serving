@@ -10,7 +10,7 @@ class LocalOneHotEncoder(override val sparkTransformer: OneHotEncoder)
     localData.column(sparkTransformer.getInputCol) match {
       case Some(column) =>
         val col = column.data match {
-          case d: List[Number] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
+          case d: List[Number @unchecked] if d.isInstanceOf[Seq[Number]] => d.map(_.doubleValue())
           case x               => throw new IllegalArgumentException(s"Incorrect index value: $x")
         }
         col.foreach(
