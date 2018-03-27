@@ -27,14 +27,14 @@ object LocalGBTRegressor
       val treeNodesData = dataRows
         .filter(_("treeID") == treeRow("treeID"))
         .map(_("nodeData"))
-        .asInstanceOf[List[Map[String, Any]]]
+        .asInstanceOf[Seq[Map[String, Any]]]
       LocalDecisionTreeRegressionModel.createTree(
         meta,
-        LocalData.fromMapList(treeNodesData)
+        LocalData.fromMapList(treeNodesData.toList)
       )
     }
     val weights =
-      treeData.column("weights").get.data.asInstanceOf[List[Double]].toArray
+      treeData.column("weights").get.data.asInstanceOf[Seq[Double]].toArray
 
     val parent = new GBTRegressor()
       .setMaxIter(metadata.paramMap("maxIter").asInstanceOf[Number].intValue())

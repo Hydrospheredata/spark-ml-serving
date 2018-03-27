@@ -53,8 +53,7 @@ trait GenericTestSpec extends FunSpec with BeforeAndAfterAll {
           .column(col)
           .getOrElse(throw new IllegalArgumentException("Validation column is absent"))
         resCol.data.zip(valCol.data).foreach {
-          case (r: Seq[Number], v: Seq[Number])
-            if r.head.isInstanceOf[Number] && v.head.isInstanceOf[Number] =>
+          case (r: Seq[Number @unchecked], v: Seq[Number @unchecked]) if r.head.isInstanceOf[Number] && r.head.isInstanceOf[Number] =>
             r.zip(v).foreach {
               case (ri, vi) =>
                 assert(ri.doubleValue() - vi.doubleValue() <= accuracy, s"$ri - $vi > $accuracy")

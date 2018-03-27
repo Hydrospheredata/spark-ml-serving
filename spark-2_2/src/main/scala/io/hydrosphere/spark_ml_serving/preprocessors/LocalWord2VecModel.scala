@@ -69,9 +69,9 @@ object LocalWord2VecModel
   override def build(metadata: Metadata, data: LocalData): Word2VecModel = {
     val ctorParams = for {
       word <- data.column("word")
-      words = word.data.asInstanceOf[List[String]]
+      words = word.data.asInstanceOf[Seq[String]]
       vector <- data.column("vector")
-      vectors = vector.data.asInstanceOf[List[List[Float]]]
+      vectors = vector.data.asInstanceOf[Seq[Seq[Float]]]
     } yield {
       words.zip(vectors.map(_.toArray)).toMap
     }

@@ -11,7 +11,8 @@ lazy val commonSettings = Seq(
 def addSources(sparkDir: String) = {
   Seq(
     unmanagedSourceDirectories in Compile += baseDirectory.value / sparkDir / "src" / "main" / "scala",
-    unmanagedSourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "scala"
+    unmanagedSourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "scala",
+    unmanagedResourceDirectories in Test += baseDirectory.value / sparkDir / "src" / "test" / "resources"
   )
 }
 

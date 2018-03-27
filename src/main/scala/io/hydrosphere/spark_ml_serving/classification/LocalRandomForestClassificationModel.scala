@@ -30,10 +30,10 @@ object LocalRandomForestClassificationModel
       val treeNodesData = dataRows
         .filter(_("treeID") == treeRow("treeID"))
         .map(_("nodeData"))
-        .asInstanceOf[List[Map[String, Any]]]
+        .asInstanceOf[Seq[Map[String, Any]]]
       LocalDecisionTreeClassificationModel.createTree(
         meta,
-        LocalData.fromMapList(treeNodesData)
+        LocalData.fromMapList(treeNodesData.toList)
       )
     }
     val ctor = classOf[RandomForestClassificationModel].getDeclaredConstructor(

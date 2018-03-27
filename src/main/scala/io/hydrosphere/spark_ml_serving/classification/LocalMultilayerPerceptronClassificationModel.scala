@@ -2,6 +2,7 @@ package io.hydrosphere.spark_ml_serving.classification
 
 import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common._
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
@@ -17,8 +18,9 @@ object LocalMultilayerPerceptronClassificationModel
     metadata: Metadata,
     data: LocalData
   ): MultilayerPerceptronClassificationModel = {
-    val layers  = data.column("layers").get.data.head.asInstanceOf[List[Int]].toArray
-    val weights = data.column("weights").get.data.head.asInstanceOf[Map[String, Any]]
+    val layers = data.column("layers").get.data.head.asInstanceOf[Seq[Int]].toArray
+    val weightsParam = data.column("weights").get.data.head.asInstanceOf[Map[String, Any]]
+    val weights = DataUtils.constructVector(weightsParam)
     val constructor = classOf[MultilayerPerceptronClassificationModel].getDeclaredConstructor(
       classOf[String],
       classOf[Array[Int]],
@@ -29,7 +31,7 @@ object LocalMultilayerPerceptronClassificationModel
       .newInstance(
         metadata.uid,
         layers,
-        Vectors.dense(weights("values").asInstanceOf[List[Double]].toArray)
+        weights
       )
       .setFeaturesCol(metadata.paramMap("featuresCol").asInstanceOf[String])
       .setPredictionCol(metadata.paramMap("predictionCol").asInstanceOf[String])

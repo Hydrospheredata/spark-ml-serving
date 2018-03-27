@@ -19,7 +19,7 @@ class LocalVectorAssembler(override val sparkTransformer: VectorAssembler)
             inCol.data.map {
               case number: java.lang.Number => Seq(number.doubleValue())
               case boolean: java.lang.Boolean => Seq(if (boolean) 1.0 else 0.0)
-              case vector: Seq[Double] => vector
+              case vector: Seq[Number @unchecked] if vector.isInstanceOf[Seq[Number]] => vector.map(_.doubleValue())
               case x => throw new IllegalArgumentException(s"LocalVectorAssembler does not support the ($x) ${x.getClass} type")
             }
           case None => throw new IllegalArgumentException(s"LocalVectorAssembler needs $inName column, which doesn't exist")

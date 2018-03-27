@@ -1,12 +1,11 @@
 package io.hydrosphere.spark_ml_serving.classification
 
-import java.lang.Boolean
-
 import io.hydrosphere.spark_ml_serving.TypedTransformerConverter
 import io.hydrosphere.spark_ml_serving.common._
 import io.hydrosphere.spark_ml_serving.common.classification.LocalProbabilisticClassificationModel
+import io.hydrosphere.spark_ml_serving.common.utils.DataUtils
 import org.apache.spark.ml.classification.LogisticRegressionModel
-import org.apache.spark.ml.linalg.{Matrix, SparseMatrix, Vector, Vectors}
+import org.apache.spark.ml.linalg.{Matrix, Vector}
 
 class LocalLogisticRegressionModel(override val sparkTransformer: LogisticRegressionModel)
   extends LocalProbabilisticClassificationModel[LogisticRegressionModel] {}
@@ -26,18 +25,10 @@ object LocalLogisticRegressionModel
     constructor.setAccessible(true)
     val coefficientMatrixParams =
       data.column("coefficientMatrix").get.data.head.asInstanceOf[Map[String, Any]]
-    val coefficientMatrix = new SparseMatrix(
-      coefficientMatrixParams("numRows").asInstanceOf[Int],
-      coefficientMatrixParams("numCols").asInstanceOf[Int],
-      coefficientMatrixParams("colPtrs").asInstanceOf[List[Int]].toArray[Int],
-      coefficientMatrixParams("rowIndices").asInstanceOf[List[Int]].toArray[Int],
-      coefficientMatrixParams("values").asInstanceOf[List[Double]].toArray[Double],
-      coefficientMatrixParams("isTransposed").asInstanceOf[Boolean]
-    )
+    val coefficientMatrix = DataUtils.constructMatrix(coefficientMatrixParams)
     val interceptVectorParams =
       data.column("interceptVector").get.data.head.asInstanceOf[Map[String, Any]]
-    val interceptVector =
-      Vectors.dense(interceptVectorParams("values").asInstanceOf[List[Double]].toArray[Double])
+    val interceptVector = DataUtils.constructVector(interceptVectorParams)
     constructor
       .newInstance(
         metadata.uid,

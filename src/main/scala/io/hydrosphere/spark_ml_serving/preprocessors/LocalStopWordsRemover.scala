@@ -15,9 +15,9 @@ class LocalStopWordsRemover(override val sparkTransformer: StopWordsRemover)
       case Some(column) =>
         val newData = column.data.map(r => {
           if (sparkTransformer.getCaseSensitive) {
-            r.asInstanceOf[List[String]].filter(s => !stopWordsSet.contains(s))
+            r.asInstanceOf[Seq[String]].filter(s => !stopWordsSet.contains(s))
           } else {
-            r.asInstanceOf[List[String]].filter(s => !lowerStopWords.contains(toLower(s)))
+            r.asInstanceOf[Seq[String]].filter(s => !lowerStopWords.contains(toLower(s)))
           }
         })
         localData.withColumn(LocalDataColumn(sparkTransformer.getOutputCol, newData))
@@ -35,7 +35,7 @@ object LocalStopWordsRemover
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
       .setCaseSensitive(metadata.paramMap("caseSensitive").asInstanceOf[Boolean])
-      .setStopWords(metadata.paramMap("stopWords").asInstanceOf[List[String]].toArray)
+      .setStopWords(metadata.paramMap("stopWords").asInstanceOf[Seq[String]].toArray)
   }
 
   override implicit def toLocal(transformer: StopWordsRemover) =

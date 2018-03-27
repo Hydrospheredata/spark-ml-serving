@@ -46,7 +46,7 @@ object LocalCountVectorizerModel
   with TypedTransformerConverter[CountVectorizerModel] {
 
   override def build(metadata: Metadata, data: LocalData): CountVectorizerModel = {
-    val vocabulary = data.column("vocabulary").get.data.head.asInstanceOf[List[String]].toArray
+    val vocabulary = data.column("vocabulary").get.data.head.asInstanceOf[Seq[String]].toArray
     val inst       = new CountVectorizerModel(metadata.uid, vocabulary)
     inst
       .setInputCol(metadata.paramMap("inputCol").toString)

@@ -41,7 +41,7 @@ object LocalIndexToString
     ctor.setAccessible(true)
     ctor
       .newInstance(metadata.uid)
-      .setLabels(metadata.paramMap("labels").asInstanceOf[List[String]].to[Array])
+      .setLabels(metadata.paramMap("labels").asInstanceOf[Seq[String]].toArray)
       .setInputCol(metadata.paramMap("inputCol").asInstanceOf[String])
       .setOutputCol(metadata.paramMap("outputCol").asInstanceOf[String])
   }

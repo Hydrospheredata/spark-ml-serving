@@ -23,16 +23,8 @@ object LocalNaiveBayes
     constructor.setAccessible(true)
     val matrixMetadata = data.column("theta").get.data.head.asInstanceOf[Map[String, Any]]
     val matrix         = DataUtils.constructMatrix(matrixMetadata)
-    val pi = data
-      .column("pi")
-      .get
-      .data
-      .head
-      .asInstanceOf[Map[String, Any]]
-      .getOrElse("values", List())
-      .asInstanceOf[List[Double]]
-      .toArray
-    val piVec = Vectors.dense(pi)
+    val piParams = data.column("pi").get.data.head.asInstanceOf[Map[String, Any]]
+    val piVec = DataUtils.constructVector(piParams)
 
     val nb = constructor
       .newInstance(metadata.uid, piVec, matrix)

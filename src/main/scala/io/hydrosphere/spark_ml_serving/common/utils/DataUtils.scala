@@ -2,14 +2,9 @@ package io.hydrosphere.spark_ml_serving.common.utils
 
 import breeze.linalg.{DenseVector => BDV, SparseVector => BSV, Vector => BV}
 import io.hydrosphere.spark_ml_serving.common.{LocalData, Metadata}
-import org.apache.spark.ml.linalg.{DenseVector, Matrices, Matrix, SparseVector, Vector, Vectors}
+import org.apache.spark.ml.linalg.{DenseMatrix, DenseVector, Matrix, SparseMatrix, SparseVector, Vector, Vectors}
 import org.apache.spark.ml.tree._
-import org.apache.spark.mllib.linalg.{
-  DenseVector => OldDenseVector,
-  Matrix => OldMatrix,
-  SparseVector => OldSparceVector,
-  Vector => OldVector
-}
+import org.apache.spark.mllib.linalg.{DenseVector => OldDenseVector, Matrix => OldMatrix, SparseVector => OldSparceVector, Vector => OldVector}
 
 object DataUtils {
   implicit def mllibVectorToMlVector(v: OldSparceVector): SparseVector =
@@ -56,30 +51,53 @@ object DataUtils {
   }
 
   def constructMatrix(params: Map[String, Any]): Matrix = {
-    val numRows = params("numRows").asInstanceOf[Int]
-    val numCols = params("numCols").asInstanceOf[Int]
-    val values  = params("values").asInstanceOf[List[Double]].toArray
+    if (!params.contains("type")) {
+      throw new IllegalArgumentException(s"Not a valid matrix: $params")
+    }
+    val matType = params("type").asInstanceOf[Int]
+    val numRows = params("numRows").asInstanceOf[java.lang.Integer]
+    val numCols = params("numCols").asInstanceOf[java.lang.Integer]
+    val isTransposed = params("isTransposed").asInstanceOf[java.lang.Boolean]
+    val values  = params("values").asInstanceOf[Seq[Double]].toArray
 
-    if (params.contains("colPtrs")) {
-      val colPtrs    = params("colPtrs").asInstanceOf[Array[Int]]
-      val rowIndices = params("rowIndices").asInstanceOf[Array[Int]]
-      val matrix     = Matrices.sparse(numRows, numCols, colPtrs, rowIndices, values)
+    matType match {
+      case 0 => // sparse matrix
+        val colPtrs    = params("colPtrs").asInstanceOf[Seq[Int]]
+        val rowIndices = params("rowIndices").asInstanceOf[Seq[Int]]
 
-      if (params.keySet.contains("isTransposed")) {
-        val isTransposed = matrix.getClass.getDeclaredField("isTransposed")
-        isTransposed.setAccessible(true)
-        isTransposed.setBoolean(matrix, params("isTransposed").asInstanceOf[Boolean])
-      }
-      matrix
-    } else {
-      val matrix = Matrices.dense(numRows, numCols, values)
+        val ctor = classOf[SparseMatrix].getDeclaredConstructor(
+          classOf[Int],
+          classOf[Int],
+          classOf[Array[Int]],
+          classOf[Array[Int]],
+          classOf[Array[Double]],
+          classOf[Boolean]
+        )
 
-      if (params.keySet.contains("isTransposed")) {
-        val isTransposed = matrix.getClass.getDeclaredField("isTransposed")
-        isTransposed.setAccessible(true)
-        isTransposed.setBoolean(matrix, params("isTransposed").asInstanceOf[Boolean])
-      }
-      matrix
+        ctor.newInstance(
+          numRows,
+          numCols,
+          colPtrs.toArray,
+          rowIndices.toArray,
+          values,
+          isTransposed
+        ).asInstanceOf[Matrix]
+
+      case 1 => // dense matrix
+
+        val ctor = classOf[DenseMatrix].getDeclaredConstructor(
+          classOf[Int],
+          classOf[Int],
+          classOf[Array[Double]],
+          classOf[Boolean]
+        )
+
+        ctor.newInstance(
+          numRows,
+          numCols,
+          values,
+          isTransposed
+        ).asInstanceOf[Matrix]
     }
   }
 
@@ -87,11 +105,11 @@ object DataUtils {
     if (params.contains("size")) {
       Vectors.sparse(
         params("size").asInstanceOf[Int],
-        params("indices").asInstanceOf[List[Int]].toArray[Int],
-        params("values").asInstanceOf[List[Double]].toArray[Double]
+        params("indices").asInstanceOf[Seq[Int]].toArray,
+        params("values").asInstanceOf[Seq[Double]].toArray
       )
     } else {
-      Vectors.dense(params("values").asInstanceOf[List[Double]].toArray[Double])
+      Vectors.dense(params("values").asInstanceOf[Seq[Double]].toArray)
     }
   }
 
@@ -100,7 +118,7 @@ object DataUtils {
     val nodeData = nodeRows.filter { _("id") == nodeId }.head
     val impurity = DataUtils.createImpurityCalculator(
       metadata.paramMap("impurity").asInstanceOf[String],
-      nodeData("impurityStats").asInstanceOf[List[Double]].to[Array]
+      nodeData("impurityStats").asInstanceOf[Seq[Double]].toArray
     )
 
     if (isInternalNode(nodeData)) {
@@ -156,7 +174,7 @@ object DataUtils {
   }
 
   def createSplit(data: Map[String, Any]): Split = {
-    val cot = data("leftCategoriesOrThreshold").asInstanceOf[List[Double]]
+    val cot = data("leftCategoriesOrThreshold").asInstanceOf[Seq[Double]]
     data("numCategories").toString.toInt match {
       case -1 =>
         val ctor = classOf[ContinuousSplit].getDeclaredConstructor(classOf[Int], classOf[Double])
@@ -174,7 +192,7 @@ object DataUtils {
         ctor.setAccessible(true)
         ctor.newInstance(
           data("featureIndex").asInstanceOf[java.lang.Integer],
-          cot.to[Array],
+          cot.toArray,
           x.asInstanceOf[java.lang.Integer]
         )
     }
