@@ -1,5 +1,6 @@
-import io.hydrosphere.spark_ml_serving._
-
+import io.hydrosphere.spark_ml_serving.LocalPipelineModel
+import io.hydrosphere.spark_ml_serving.common.{LocalData, LocalDataColumn}
+import org.apache.spark.SparkConf
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.feature._
 import org.apache.spark.ml.linalg._
@@ -7,10 +8,12 @@ import org.apache.spark.sql.SparkSession
 
 object Train extends App {
 
-  val session = SparkSession.builder()
-    .master("local")
-    .appName("Word Count")
-    .getOrCreate()
+  val conf = new SparkConf()
+    .setMaster("local[2]")
+    .setAppName("example")
+    .set("spark.ui.enabled", "false")
+
+  val session: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
   val df = session.createDataFrame(Seq(
             (0, Array("a", "b", "c")),
@@ -26,14 +29,14 @@ object Train extends App {
    val pipeline = new Pipeline().setStages(Array(cv))
 
    val model = pipeline.fit(df)
-   model.write.overwrite().save("./target/countVectorizer")
+   model.write.overwrite().save("../target/test_models/2.0.2/countVectorizer")
 }
 
 object Serve extends App {
 
   import LocalPipelineModel._
 
-  val model = PipelineLoader.load("./target/countVectorizer")
+  val model = LocalPipelineModel .load("../target/test_models/2.0.2/countVectorizer")
 
   val data = LocalData(List(LocalDataColumn("words", List(
     List("a", "b", "d"),
