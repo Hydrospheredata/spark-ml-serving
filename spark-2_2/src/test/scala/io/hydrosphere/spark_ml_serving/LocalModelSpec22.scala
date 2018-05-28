@@ -60,4 +60,19 @@ class LocalModelSpec22 extends GenericTestSpec {
     )
   )
 
+  modelTest(
+    data = session.createDataFrame(Seq(
+      (1.0, Double.NaN),
+      (2.0, Double.NaN),
+      (Double.NaN, 3.0),
+      (4.0, 4.0),
+      (5.0, 5.0)
+    )).toDF("a", "b"),
+    steps = Seq(
+      new Imputer()
+        .setInputCols(Array("a", "b"))
+        .setOutputCols(Array("out_a", "out_b"))
+    ),
+    columns = Seq("out_a", "out_b")
+  )
 }
