@@ -64,4 +64,4 @@ Tokenizer              |   V       |   V       |    V
 VectorAssembler        |   V       |   V       |    V
 VectorIndexer          |   V       |   V       |    V
 Word2VecModel          |   V       |   V       |    V
-ImputerModel           |   X       |   X       |    V
+ImputerModel           |   N/A     |   N/A     |    V
