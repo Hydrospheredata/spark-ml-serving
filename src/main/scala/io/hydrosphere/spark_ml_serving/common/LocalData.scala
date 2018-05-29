@@ -33,6 +33,10 @@ class LocalData(private val columnData: List[LocalDataColumn[_]]) {
     LocalData(columnData :+ localDataColumn)
   }
 
+  def withColumns(localDataColumn: LocalDataColumn[_]*): LocalData = {
+    LocalData(columnData ++ localDataColumn)
+  }
+
   def column(columnName: String): Option[LocalDataColumn[_]] = {
     columnData.find(_.name == columnName)
   }
